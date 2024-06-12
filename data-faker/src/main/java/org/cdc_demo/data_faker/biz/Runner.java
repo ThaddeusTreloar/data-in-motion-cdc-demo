@@ -20,10 +20,12 @@ import org.cdc_demo.data_faker.avro_generated.OrderLineItem;
 import org.cdc_demo.data_faker.avro_generated.Product;
 import org.cdc_demo.data_faker.avro_generated.Shipment;
 import org.cdc_demo.data_faker.avro_generated.TableId;
+import org.cdc_demo.data_faker.util.DecisionTree;
 import org.cdc_demo.data_faker.util.Generator;
 import org.cdc_demo.data_faker.util.Topic;
 import org.cdc_demo.data_faker.util.Topics;
 import org.cdc_demo.data_faker.util.Tuple;
+import org.cdc_demo.data_faker.util.DecisionTree.Decision;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -79,44 +81,159 @@ public class Runner {
         order_line_items
             .forEach(order_line_item -> {
                 try {
+                    var order_line_id = (long) this.order_line_items.size();
+
                     var response = order_line_item_producer.send(
                         new ProducerRecord<>(
                             topics.getOrderLineItems().getName(),
-                            TableId.newBuilder().setId(order_line_item.getOrderId()).build(),
+                            TableId.newBuilder().setId(order_line_id).build(),
                             order_line_item));
                     
-                    log.info("Order Line Item: {}", order_line_item);
+                    log.info("Created Order Line Item, line_id: {}, body: {}", order_line_id, order_line_item);
     
                     response.get();
 
-                    
+                    this.order_line_items.add(order_line_item);
                 } catch (Exception e) {
                     log.error("Error: {}", e);
                 }
             });
         
-            try {
-                var response = order_producer.send(
-                        new ProducerRecord<>(
-                                topics.getOrders().getName(),
-                                TableId.newBuilder().setId(order_id).build(),
-                                order));
+        try {
+            var response = order_producer.send(
+                    new ProducerRecord<>(
+                            topics.getOrders().getName(),
+                            TableId.newBuilder().setId(order_id).build(),
+                            order));
 
-                log.info("Order: {}", order);
+            log.info("Created Order, order_id: {}, body: {}", order_id, order);
 
-                response.get();
-            } catch (Exception e) {
-                log.error("Error: {}", e);
-            }
+            response.get();
+
+            this.orders.add(order);
+        } catch (Exception e) {
+            log.error("Error: {}", e);
+        }
     }
 
     private void createShipment(long order_id) {
+        // Catch any faults in our logic.
+        // If there is already a shipment, progress the shipment instead.
+        var order_has_shipment = this.shipments.stream()
+            .anyMatch(shipment -> shipment.getOrderId() == order_id);
+
+        if (order_has_shipment) {
+            var shipment_id = IntStream
+                .range(0, this.shipments.size())
+                .filter(i -> this.shipments.get(i).getOrderId() == order_id)
+                .findFirst()
+                .getAsInt();
+
+            progressShipment(shipment_id);
+        }
+
+        // Otherwise, create a shipment
+        var shipment = generator.generateShipment(order_id);
+
+        try {
+            var response = shipment_producer.send(
+                    new ProducerRecord<>(
+                            topics.getShipments().getName(),
+                            TableId.newBuilder().setId((long) this.shipments.size()).build(),
+                            shipment));
+
+            log.info("Shipment, shipment_id: {}, body: {}", this.shipments.size(), shipment);
+
+            response.get();
+
+            this.shipments.add(shipment);
+        } catch (Exception e) {
+            log.error("Error: {}", e);
+        }
+
+        // Update the order
+        updateOrder(order_id, "SHIPPED");
     }
 
-    private void updateOrder(long order_id) {
+    private void updateOrder(long order_id, String status) {
+        var order = this.orders.get((int) order_id);
+
+        order.setOrderStatus(status);
+        order.setUpdatedOn(Instant.now());
+
+        try {
+            var response = order_producer.send(
+                    new ProducerRecord<>(
+                            topics.getOrders().getName(),
+                            TableId.newBuilder().setId(order_id).build(),
+                            order));
+
+            log.info("Updated Order, order_id: {}, body: {}", order_id, order);
+
+            response.get();
+        } catch (Exception e) {
+            log.error("Error: {}", e);
+        }
     }
 
     private void progressShipment(long shipment_id) {
+        var shipment = this.shipments.get((int) shipment_id);
+
+        shipment.setShipmentStatus("DELIVERED");
+        shipment.setUpdatedOn(Instant.now());
+
+        try {
+            var response = shipment_producer.send(
+                    new ProducerRecord<>(
+                            topics.getShipments().getName(),
+                            TableId.newBuilder().setId(shipment_id).build(),
+                            shipment));
+
+            log.info("Updated Shipment, shipment_id: {}, body: {}", shipment_id, shipment);
+
+            response.get();
+        } catch (Exception e) {
+            log.error("Error: {}", e);
+        }
+
+        updateOrder(shipment.getOrderId(), "COMPLETED");
+    }
+
+    private void cancelOrder(long order_id) {
+        // Catch any faults in our logic.
+        // If there is already a shipment, progress the shipment instead.
+        var order_has_shipment = this.shipments.stream()
+            .anyMatch(shipment -> shipment.getOrderId() == order_id);
+
+        if (order_has_shipment) {
+            var shipment_id = IntStream
+                .range(0, this.shipments.size())
+                .filter(i -> this.shipments.get(i).getOrderId() == order_id)
+                .findFirst()
+                .getAsInt();
+
+            progressShipment(shipment_id);
+        }
+
+        // Otherwise, cancel the order
+        var order = this.orders.get((int) order_id);
+
+        order.setOrderStatus("CANCELLED");
+        order.setUpdatedOn(Instant.now());
+
+        try {
+            var response = order_producer.send(
+                    new ProducerRecord<>(
+                            topics.getOrders().getName(),
+                            TableId.newBuilder().setId(order_id).build(),
+                            order));
+
+            log.info("Cancelled Order, order_id: {}, body: {}", order_id, order);
+
+            response.get();
+        } catch (Exception e) {
+            log.error("Error: {}", e);
+        }
     }
 
     public Runner(KafkaEnv config) {
@@ -138,7 +255,7 @@ public class Runner {
             for (long i = 0; i < Generator.CUSTOMER_POOL_SIZE; i++) {
                 var table_id = TableId.newBuilder().setId(i).build();
                 var customer = generator.generateCustomer();
-                var contact = generator.generateContact(table_id.getId());
+                var contact = generator.generateContact(table_id.getId(), customer);
                 var address = generator.generateAddress(table_id.getId());
 
                 customer_producer.send(new ProducerRecord<>(topics.getCustomers().getName(), table_id, customer));
@@ -178,6 +295,8 @@ public class Runner {
 
         // Stream orders and shipments
         try {
+            var decicion_tree = new DecisionTree();
+
             while (true) {
                 var cusomer_id = generator.generateLong(Generator.CUSTOMER_POOL_SIZE);
 
@@ -196,11 +315,27 @@ public class Runner {
                                                 order_tuple -> order_tuple.x.equals(shipment_tuple.y.getOrderId())))
                         .collect(Collectors.toList());
 
-                var has_existing_order = existing_orders.size() > 0;
-                var has_existing_shipment = existing_shipments.size() > 0;
+                var decision = decicion_tree.getDecision(existing_orders, existing_shipments);
+                
+                var idx_last_order = existing_orders.size() - 1;
+                var idx_last_shipment = existing_shipments.size() - 1;
 
-                // decision tree
-                // execute decision
+                switch (decision) {
+                    case CREATE_ORDER:
+                        createOrder(cusomer_id);
+                        break;
+                    case CREATE_SHIPMENT:
+                        createShipment(existing_orders.get(idx_last_order).x);
+                        break;
+                    case CANCEL_ORDER:
+                        cancelOrder(existing_orders.get(idx_last_order).x);
+                        break;
+                    case PROGRESS_SHIPMENT:
+                        progressShipment(existing_shipments.get(idx_last_shipment).x);
+                        break;
+                    default:
+                        break;
+                }
 
                 Thread.sleep(1000);
             }

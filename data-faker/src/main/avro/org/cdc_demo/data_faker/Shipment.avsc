@@ -32,7 +32,7 @@
     {
       "name": "shipment_status",
       "type": "string",
-      "doc": "Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED"
+      "doc": "Shipment status. Can be: SHIPPED | DELIVERED"
     }
   ],
   "name": "Shipment",

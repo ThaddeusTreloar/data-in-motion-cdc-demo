@@ -36,7 +36,7 @@ public class Topics {
     public static String CONTACTS_TOPIC = "contacts";
     public static String CUSTOMERS_TOPIC = "customers";
     public static String ORDERS_TOPIC = "orders";
-    public static String ORDER_LINE_ITEMS_TOPIC = "order_line_items";
+    public static String ORDER_LINE_ITEMS_TOPIC = "order-line-items";
     public static String PRODUCTS_TOPIC = "products";
     public static String SHIPMENTS_TOPIC = "shipments";
 

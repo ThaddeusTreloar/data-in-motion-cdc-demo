@@ -16,7 +16,7 @@ import org.apache.avro.message.SchemaStore;
 @org.apache.avro.specific.AvroGenerated
 public class Shipment extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
   private static final long serialVersionUID = -7673805427407758157L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Shipment\",\"namespace\":\"org.cdc_demo.data_faker.avro_generated\",\"doc\":\"Shipment table row\",\"fields\":[{\"name\":\"order_id\",\"type\":\"long\",\"doc\":\"FK to Orders table\"},{\"name\":\"created_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment create time\"},{\"name\":\"shipped_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment ship time\"},{\"name\":\"updated_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment update time\"},{\"name\":\"shipment_status\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Shipment\",\"namespace\":\"org.cdc_demo.data_faker.avro_generated\",\"doc\":\"Shipment table row\",\"fields\":[{\"name\":\"order_id\",\"type\":\"long\",\"doc\":\"FK to Orders table\"},{\"name\":\"created_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment create time\"},{\"name\":\"shipped_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment ship time\"},{\"name\":\"updated_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment update time\"},{\"name\":\"shipment_status\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Shipment status. Can be: SHIPPED | DELIVERED\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -83,7 +83,7 @@ static {
    private java.time.Instant shipped_on;
   /** Shipment update time */
    private java.time.Instant updated_on;
-  /** Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED */
+  /** Shipment status. Can be: SHIPPED | DELIVERED */
    private java.lang.String shipment_status;
 
   /**
@@ -99,7 +99,7 @@ static {
    * @param created_on Shipment create time
    * @param shipped_on Shipment ship time
    * @param updated_on Shipment update time
-   * @param shipment_status Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED
+   * @param shipment_status Shipment status. Can be: SHIPPED | DELIVERED
    */
   public Shipment(java.lang.Long order_id, java.time.Instant created_on, java.time.Instant shipped_on, java.time.Instant updated_on, java.lang.String shipment_status) {
     this.order_id = order_id;
@@ -225,7 +225,7 @@ static {
 
   /**
    * Gets the value of the 'shipment_status' field.
-   * @return Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED
+   * @return Shipment status. Can be: SHIPPED | DELIVERED
    */
   public java.lang.String getShipmentStatus() {
     return shipment_status;
@@ -234,7 +234,7 @@ static {
 
   /**
    * Sets the value of the 'shipment_status' field.
-   * Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED
+   * Shipment status. Can be: SHIPPED | DELIVERED
    * @param value the value to set.
    */
   public void setShipmentStatus(java.lang.String value) {
@@ -290,7 +290,7 @@ static {
     private java.time.Instant shipped_on;
     /** Shipment update time */
     private java.time.Instant updated_on;
-    /** Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED */
+    /** Shipment status. Can be: SHIPPED | DELIVERED */
     private java.lang.String shipment_status;
 
     /** Creates a new Builder */
@@ -528,7 +528,7 @@ static {
 
     /**
       * Gets the value of the 'shipment_status' field.
-      * Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED
+      * Shipment status. Can be: SHIPPED | DELIVERED
       * @return The value.
       */
     public java.lang.String getShipmentStatus() {
@@ -538,7 +538,7 @@ static {
 
     /**
       * Sets the value of the 'shipment_status' field.
-      * Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED
+      * Shipment status. Can be: SHIPPED | DELIVERED
       * @param value The value of 'shipment_status'.
       * @return This builder.
       */
@@ -551,7 +551,7 @@ static {
 
     /**
       * Checks whether the 'shipment_status' field has been set.
-      * Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED
+      * Shipment status. Can be: SHIPPED | DELIVERED
       * @return True if the 'shipment_status' field has been set, false otherwise.
       */
     public boolean hasShipmentStatus() {
@@ -561,7 +561,7 @@ static {
 
     /**
       * Clears the value of the 'shipment_status' field.
-      * Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED
+      * Shipment status. Can be: SHIPPED | DELIVERED
       * @return This builder.
       */
     public org.cdc_demo.data_faker.avro_generated.Shipment.Builder clearShipmentStatus() {

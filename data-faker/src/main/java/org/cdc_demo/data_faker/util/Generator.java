@@ -28,6 +28,8 @@ public class Generator {
 
     public static int CUSTOMER_POOL_SIZE = 10;
     public static int PRODUCT_POOL_SIZE = 100;
+	public static String DEFAULT_ORDER_STATE = "PENDING";
+	public static String DEFAULT_SHIPMENT_STATE = "SHIPPED";
 
 	public long generateLong(int max) {
 		return faker.number().numberBetween(0, max-1);
@@ -41,13 +43,18 @@ public class Generator {
 			.build();
 	}
 
-	public Contact generateContact(long customerId) {
+	public Contact generateContact(long customerId, Customer customer) {
+		var email = customer.getCustomerName().toLowerCase().replace(" ", ".") + "@example.com";
+		var twitter_handle = customer.getCustomerName().replace(" ", "") + faker.number().numberBetween(1, 100);
+		var instagram_handle = customer.getCustomerName().replace(" ", ".") + faker.number().numberBetween(1, 100);
+
+
 		return Contact.newBuilder()
 			.setCustomerId(customerId)
-			.setEmail(faker.internet().emailAddress())
+			.setEmail(email)
 			.setMobile(faker.phoneNumber().phoneNumber())
-			.setTwitter(faker.name().username())
-			.setInstagram(faker.name().username())
+			.setTwitter(twitter_handle)
+			.setInstagram(instagram_handle)
 			.build();
 	}
 
@@ -77,7 +84,7 @@ public class Generator {
 			.setCustomerId(customerId)
 			.setShippingAddress(customerId)
 			.setOrderDate(LocalDate.now())
-			.setOrderStatus("PENDING")
+			.setOrderStatus(DEFAULT_ORDER_STATE)
 			.setUpdatedOn(Instant.now())
 			.build();
 	}
@@ -87,7 +94,7 @@ public class Generator {
 			.setOrderId(orderId)
 			.setCreatedOn(Instant.now())
 			.setShippedOn(Instant.now())
-			.setShipmentStatus("PENDING")
+			.setShipmentStatus(DEFAULT_SHIPMENT_STATE)
 			.setUpdatedOn(Instant.now())
 			.build();
 	}
