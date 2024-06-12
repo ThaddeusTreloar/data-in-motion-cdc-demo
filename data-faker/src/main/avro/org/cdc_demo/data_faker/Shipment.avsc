@@ -1,0 +1,42 @@
+{
+  "fields": [
+    {
+      "name": "order_id",
+      "type": "long",
+      "doc": "FK to Orders table"
+    },
+    {
+      "name": "created_on",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Shipment create time"
+    },
+    {
+      "name": "shipped_on",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Shipment ship time"
+    },
+    {
+      "name": "updated_on",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Shipment update time"
+    },
+    {
+      "name": "shipment_status",
+      "type": "string",
+      "doc": "Shipment status. Can be: PENDING | SHIPPED | DELIVERED | CANCELLED | RETURNED"
+    }
+  ],
+  "name": "Shipment",
+  "namespace": "org.cdc_demo.data_faker.avro_generated",
+  "type": "record",
+  "doc": "Shipment table row"
+}

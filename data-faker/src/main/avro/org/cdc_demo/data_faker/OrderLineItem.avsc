@@ -1,0 +1,28 @@
+{
+  "fields": [
+    {
+      "name": "product_id",
+      "type": "long",
+      "doc": "FK to Products table"
+    },
+    {
+      "name": "order_id",
+      "type": "long",
+      "doc": "FK to Address table"
+    },
+    {
+      "name": "quantity",
+      "type": "int",
+      "doc": "Quantity of items"
+    },
+    {
+      "name": "line_total",
+      "type": "float",
+      "doc": "Order line total price"
+    }
+  ],
+  "name": "OrderLineItem",
+  "namespace": "org.cdc_demo.data_faker.avro_generated",
+  "type": "record",
+  "doc": "Order Line item table row"
+}

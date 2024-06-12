@@ -1,0 +1,39 @@
+{
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": "long",
+      "doc": "FK to Customers table"
+    },
+    {
+      "name": "shipping_address",
+      "type": "long",
+      "doc": "FK to Address table"
+    },
+    {
+      "name": "order_date",
+      "type": {
+        "type": "int",
+        "logicalType": "date"
+      },
+      "doc": "Shipment create time"
+    },
+    {
+      "name": "order_status",
+      "type": "string",
+      "doc": "Order state. Can be PENDING | SHIPPED | COMPLETED | CANCELLED"
+    },
+    {
+      "name": "updated_on",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Shipment update time"
+    }
+  ],
+  "name": "Order",
+  "namespace": "org.cdc_demo.data_faker.avro_generated",
+  "type": "record",
+  "doc": "Order table row"
+}

@@ -1,0 +1,48 @@
+{
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": "long",
+      "doc": "FK to Customers table"
+    },
+    {
+      "name": "address_type",
+      "type": "string",
+      "doc": "Type of address, can be: HOME | WORK | BOX"
+    },
+    {
+      "name": "street_number",
+      "type": "string",
+      "doc": "Street number"
+    },
+    {
+      "name": "street_name",
+      "type": "string",
+      "doc": "Street name"
+    },
+    {
+      "name": "city",
+      "type": "string",
+      "doc": "City"
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "doc": "State"
+    },
+    {
+      "name": "country",
+      "type": "string",
+      "doc": "Country"
+    },
+    {
+      "name": "postcode",
+      "type": "string",
+      "doc": "Postcode"
+    }
+  ],
+  "name": "Address",
+  "namespace": "org.cdc_demo.data_faker.avro_generated",
+  "type": "record",
+  "doc": "Cutomer address details"
+}

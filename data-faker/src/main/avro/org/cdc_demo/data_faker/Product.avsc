@@ -1,0 +1,23 @@
+{
+  "fields": [
+    {
+      "name": "product_name",
+      "type": "string",
+      "doc": "Name of product"
+    },
+    {
+      "name": "product_description",
+      "type": "string",
+      "doc": "Description of product"
+    },
+    {
+      "name": "list_price",
+      "type": "float",
+      "doc": "Product price"
+    }
+  ],
+  "name": "Product",
+  "namespace": "org.cdc_demo.data_faker.avro_generated",
+  "type": "record",
+  "doc": "Product item"
+}

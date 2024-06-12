@@ -1,0 +1,26 @@
+{
+  "fields": [
+    {
+      "name": "customer_name",
+      "type": "string",
+      "doc": "Customer name"
+    },
+    {
+      "name": "title",
+      "type": "string",
+      "doc": "Customer title"
+    },
+    {
+      "name": "dob",
+      "type": {
+        "type": "int",
+        "logicalType": "date"
+      },
+      "doc": "Customer date of birth"
+    }
+  ],
+  "name": "Customer",
+  "namespace": "org.cdc_demo.data_faker.avro_generated",
+  "type": "record",
+  "doc": "Order table row"
+}

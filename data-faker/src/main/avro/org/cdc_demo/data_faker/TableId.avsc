@@ -1,0 +1,11 @@
+{
+  "fields": [
+    {
+      "name": "id",
+      "type": "long"
+    }
+  ],
+  "name": "TableId",
+  "namespace": "org.cdc_demo.data_faker.avro_generated",
+  "type": "record"
+}

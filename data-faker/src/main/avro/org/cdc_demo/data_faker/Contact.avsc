@@ -1,0 +1,33 @@
+{
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": "long",
+      "doc": "FK to Customers table"
+    },
+    {
+      "name": "email",
+      "type": "string",
+      "doc": "Customer email address"
+    },
+    {
+      "name": "mobile",
+      "type": "string",
+      "doc": "Customer phone number"
+    },
+    {
+      "name": "twitter",
+      "type": "string",
+      "doc": "Twitter handle"
+    },
+    {
+      "name": "instagram",
+      "type": "string",
+      "doc": "Instagram handle"
+    }
+  ],
+  "name": "Contact",
+  "namespace": "org.cdc_demo.data_faker.avro_generated",
+  "type": "record",
+  "doc": "Customer contact details"
+}
