@@ -1,15 +1,62 @@
 INSERT INTO enriched_orders
 WITH order_table AS (
     SELECT 
-        o.id as order_id,
+        id as order_id,
+        customer_id,
+        shipping_address,
+        order_date,
+        order_status,
+        line_item_count,
+        updated_on,
+        statement_action,
+        rowtime
+    FROM (
+        SELECT 
+            *,
+            ROW_NUMBER() OVER (PARTITION BY id ORDER BY $rowtime DESC) as row_num,
+            $rowtime as rowtime
+        FROM orders
+    )
+    WHERE row_num = 1
+), shipment_table AS (
+    SELECT
+        id,
+        order_id,
+        created_on,
+        shipped_on,
+        updated_on,
+        shipment_status,
+        rowtime
+    FROM (
+        SELECT 
+            *,
+            ROW_NUMBER() OVER (PARTITION BY id ORDER BY $rowtime DESC) as row_num,
+            $rowtime as rowtime
+        FROM shipments
+    )
+    WHERE row_num = 1
+), order_shipments AS (
+    SELECT 
+        o.order_id,
         o.customer_id,
         o.shipping_address,
         o.order_date,
         o.order_status,
         o.line_item_count,
         o.updated_on,
-        o.statement_action
-    FROM orders o
+        o.statement_action,
+        CASE 
+            WHEN o.rowtime > s.rowtime THEN o.rowtime
+            ELSE s.rowtime
+        END as rowtime,
+        s.id as shipment_id,
+        s.created_on as shipment_created_on,
+        s.shipped_on,
+        s.updated_on as shipment_updated_on,
+        s.shipment_status
+    FROM order_table o
+    LEFT JOIN shipment_table s
+    ON o.order_id = s.order_id
 ),
 order_line_table AS (
     SELECT 
@@ -28,61 +75,28 @@ order_line_table AS (
     JOIN products p
     ON o.product_id = p.id
     GROUP BY order_id
-), order_with_items AS (
+),
+order_with_items AS (
     SELECT 
         o.order_id,
         o.customer_id,
-        o.shipping_address,
         o.order_date,
-        o.order_status,
-        o.line_item_count,
-        o.updated_on,
         ol.total_price,
+        o.order_status,
+        o.updated_on,
         ol.items,
-        o.statement_action
-    FROM order_table o
-    JOIN order_line_table ol
+        o.shipping_address,
+        o.statement_action,
+        o.shipment_id,
+        o.shipment_created_on,
+        o.shipped_on,
+        o.shipment_updated_on,
+        o.shipment_status,
+        o.rowtime
+    FROM order_shipments o
+    INNER JOIN order_line_table ol
     ON o.order_id = ol.order_id
     WHERE o.line_item_count = ol.item_count
-), delivery_address_table AS (
-    SELECT 
-        d.id as order_delivery_address_id,
-        d.customer_id as customer_id,
-        d.street_number as order_street_number,
-        d.street_name as order_street_name,
-        d.city as order_city,
-        d.state as order_state,
-        d.country as order_country,
-        d.postcode as order_postcode
-    FROM (
-        SELECT 
-            *,
-            ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY $rowtime DESC) as row_num
-        FROM addresses
-        WHERE address_type = 'SHIPPING'
-    ) d
-    where d.row_num = 1
-),
-order_with_delivery_address AS (
-    SELECT 
-        o.order_id, 
-        o.customer_id, 
-        o.order_date, 
-        o.total_price,
-        o.order_status, 
-        o.updated_on,
-        o.items,
-        d.order_delivery_address_id,
-        d.order_street_number,
-        d.order_street_name,
-        d.order_city,
-        d.order_state,
-        d.order_country,
-        d.order_postcode,
-        o.statement_action
-    FROM order_with_items o
-    JOIN delivery_address_table d
-    ON o.shipping_address = d.order_delivery_address_id
 )
 
-SELECT * FROM order_with_delivery_address
+SELECT * FROM order_with_items

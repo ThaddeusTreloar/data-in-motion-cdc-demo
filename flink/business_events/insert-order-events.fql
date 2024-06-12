@@ -1,22 +1,5 @@
 INSERT INTO order_events
-WITH shipment_table AS (
-    SELECT 
-        id,
-        order_id,
-        created_on,
-        shipped_on,
-        updated_on,
-        shipment_status
-    FROM (
-        SELECT 
-            *,
-            ROW_NUMBER() OVER (PARTITION BY id ORDER BY $rowtime DESC) as row_num,
-            rowtime
-        FROM shipments
-    )
-    WHERE row_num = 1
-),
-order_event AS (
+WITH order_events AS (
     SELECT 
         o.order_id, 
         CASE 
@@ -32,23 +15,23 @@ order_event AS (
         o.updated_on,
         o.items, 
         CASE
-            WHEN s.id IS NULL THEN NULL
+            WHEN o.shipment_id IS NULL THEN NULL
             ELSE JSON_OBJECT(
-                'shipment_id' VALUE s.id,
-                'created_on' VALUE CAST(s.created_on AS STRING),
-                'shipped_on' VALUE CAST(s.shipped_on AS STRING),
-                'updated_on' VALUE CAST(s.updated_on AS STRING),
-                'shipment_status' VALUE s.shipment_status
+                'shipment_id' VALUE o.shipment_id,
+                'created_on' VALUE CAST(o.shipment_created_on AS STRING),
+                'shipped_on' VALUE CAST(o.shipped_on AS STRING),
+                'updated_on' VALUE CAST(o.shipment_updated_on AS STRING),
+                'shipment_status' VALUE o.shipment_status
             )
         END AS shipments,
         JSON_OBJECT (
-            'delivery_address_id' VALUE o.order_delivery_address_id,
-            'street_number' VALUE o.order_street_number,
-            'street_name' VALUE o.order_street_name,
-            'city' VALUE o.order_city,
-            'state' VALUE o.order_state,
-            'country' VALUE o.order_country,
-            'postcode' VALUE o.order_postcode
+            'delivery_address_id' VALUE e.delivery_address_id,
+            'street_number' VALUE e.delivery_street_number,
+            'street_name' VALUE e.delivery_street_name,
+            'city' VALUE e.delivery_city,
+            'state' VALUE e.delivery_state,
+            'country' VALUE e.delivery_country,
+            'postcode' VALUE e.delivery_postcode
         ) AS delivery_address,
         JSON_OBJECT(
             'customer_id' VALUE o.customer_id,
@@ -82,28 +65,8 @@ order_event AS (
             )
         ) as customer
     FROM enriched_orders o
-    INNER JOIN shipment_table s
-    ON o.order_id = s.order_id
-    INNER JOIN enriched_customer_data e
+    INNER JOIN enriched_customer_data FOR SYSTEM_TIME AS OF o.rowtime as e
     ON o.customer_id = e.customer_id
-    WHERE (
-        o.statement_action <> 'INSERT'
-        AND o.order_status <> 'PENDING'
-        AND o.order_status <> 'CANCELLED'
-        AND s.id IS NOT NULL
-        AND (
-            (
-                o.order_status = 'SHIPPED'
-                AND s.shipment_status = 'SHIPPED'
-            ) OR (
-                o.order_status = 'COMPLETED'
-                AND s.shipment_status = 'DELIVERED'
-            )
-        )
-    ) OR (
-        o.order_status = 'PENDING'
-        OR o.order_status = 'CANCELLED'
-    )
 )
 
-SELECT * FROM order_event
+SELECT * FROM order_events

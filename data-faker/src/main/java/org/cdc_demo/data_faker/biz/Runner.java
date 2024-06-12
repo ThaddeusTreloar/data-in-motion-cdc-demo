@@ -259,7 +259,7 @@ public class Runner {
     public void run() {
         // Initialise customers, contacts, addresses, and products
         try {
-            for (long i = 0; i < Generator.CUSTOMER_POOL_SIZE; i++) {
+            for (long i = 0; i < 2000; i++) {
                 var table_id = TableId.newBuilder().setId(i).build();
                 var customer = generator.generateCustomer();
                 var contact = generator.generateContact(table_id.getId(), customer);
@@ -285,7 +285,7 @@ public class Runner {
                 log.info("Contact: {}", contact);
                 log.info("Address: {}", shipping_address);
             }
-
+            
             for (long i = 0; i < Generator.PRODUCT_POOL_SIZE; i++) {
                 var table_id = TableId.newBuilder().setId(i).build();
                 var product = generator.generateProduct();
@@ -306,6 +306,8 @@ public class Runner {
             address_producer.close();
             product_producer.close();
         }
+
+        System.exit(0);
 
         // Stream orders and shipments
         try {
