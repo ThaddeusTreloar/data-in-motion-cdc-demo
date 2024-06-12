@@ -1,0 +1,109 @@
+INSERT INTO order_events
+WITH shipment_table AS (
+    SELECT 
+        id,
+        order_id,
+        created_on,
+        shipped_on,
+        updated_on,
+        shipment_status
+    FROM (
+        SELECT 
+            *,
+            ROW_NUMBER() OVER (PARTITION BY id ORDER BY $rowtime DESC) as row_num,
+            rowtime
+        FROM shipments
+    )
+    WHERE row_num = 1
+),
+order_event AS (
+    SELECT 
+        o.order_id, 
+        CASE 
+            WHEN o.statement_action = 'INSERT' THEN 'ORDER_CREATED'
+            WHEN o.order_status = 'SHIPPED' THEN 'ORDER_UPDATED'
+            WHEN o.order_status = 'COMPLETED' THEN 'ORDER_UPDATED'
+            WHEN o.order_status = 'CANCELLED' THEN 'ORDER_CANCELLED'
+            ELSE 'ORDER_UNKNOWN'
+        END AS event_type,
+        CAST(o.order_date AS STRING) as order_date,
+        o.total_price, 
+        o.order_status,
+        o.updated_on,
+        o.items, 
+        CASE
+            WHEN s.id IS NULL THEN NULL
+            ELSE JSON_OBJECT(
+                'shipment_id' VALUE s.id,
+                'created_on' VALUE CAST(s.created_on AS STRING),
+                'shipped_on' VALUE CAST(s.shipped_on AS STRING),
+                'updated_on' VALUE CAST(s.updated_on AS STRING),
+                'shipment_status' VALUE s.shipment_status
+            )
+        END AS shipments,
+        JSON_OBJECT (
+            'delivery_address_id' VALUE o.order_delivery_address_id,
+            'street_number' VALUE o.order_street_number,
+            'street_name' VALUE o.order_street_name,
+            'city' VALUE o.order_city,
+            'state' VALUE o.order_state,
+            'country' VALUE o.order_country,
+            'postcode' VALUE o.order_postcode
+        ) AS delivery_address,
+        JSON_OBJECT(
+            'customer_id' VALUE o.customer_id,
+            'title' VALUE e.title,
+            'customer_name' VALUE e.customer_name,
+            'dob' VALUE CAST(e.dob AS STRING),
+            'contact_details' VALUE JSON_OBJECT(
+                'contact_id' VALUE e.contact_id,
+                'email' VALUE e.email,
+                'mobile' VALUE e.mobile,
+                'twitter' VALUE e.twitter,
+                'instagram' VALUE e.instagram
+            ),
+            'residential_address' VALUE JSON_OBJECT(
+                'residential_address_id' VALUE e.delivery_address_id,
+                'street_number' VALUE e.delivery_street_number,
+                'street_name' VALUE e.delivery_street_name,
+                'city' VALUE e.delivery_city,
+                'state' VALUE e.delivery_state,
+                'country' VALUE e.delivery_country,
+                'postcode' VALUE e.delivery_postcode
+            ),
+            'billing_address' VALUE JSON_OBJECT (
+                'billing_address_id' VALUE e.billing_address_id,
+                'street_number' VALUE e.billing_street_number,
+                'street_name' VALUE e.billing_street_name,
+                'city' VALUE e.billing_city,
+                'state' VALUE e.billing_state,
+                'country' VALUE e.billing_country,
+                'postcode' VALUE e.billing_postcode
+            )
+        ) as customer
+    FROM enriched_orders o
+    INNER JOIN shipment_table s
+    ON o.order_id = s.order_id
+    INNER JOIN enriched_customer_data e
+    ON o.customer_id = e.customer_id
+    WHERE (
+        o.statement_action <> 'INSERT'
+        AND o.order_status <> 'PENDING'
+        AND o.order_status <> 'CANCELLED'
+        AND s.id IS NOT NULL
+        AND (
+            (
+                o.order_status = 'SHIPPED'
+                AND s.shipment_status = 'SHIPPED'
+            ) OR (
+                o.order_status = 'COMPLETED'
+                AND s.shipment_status = 'DELIVERED'
+            )
+        )
+    ) OR (
+        o.order_status = 'PENDING'
+        OR o.order_status = 'CANCELLED'
+    )
+)
+
+SELECT * FROM order_event

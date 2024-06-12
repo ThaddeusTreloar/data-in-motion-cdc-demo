@@ -16,7 +16,7 @@ import org.apache.avro.message.SchemaStore;
 @org.apache.avro.specific.AvroGenerated
 public class Address extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
   private static final long serialVersionUID = 4019002666201261916L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Address\",\"namespace\":\"org.cdc_demo.data_faker.avro_generated\",\"doc\":\"Cutomer address details\",\"fields\":[{\"name\":\"customer_id\",\"type\":\"long\",\"doc\":\"FK to Customers table\"},{\"name\":\"address_type\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Type of address, can be: HOME | WORK | BOX\"},{\"name\":\"street_number\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Street number\"},{\"name\":\"street_name\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Street name\"},{\"name\":\"city\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"City\"},{\"name\":\"state\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"State\"},{\"name\":\"country\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Country\"},{\"name\":\"postcode\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Postcode\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Address\",\"namespace\":\"org.cdc_demo.data_faker.avro_generated\",\"doc\":\"Cutomer address details\",\"fields\":[{\"name\":\"customer_id\",\"type\":\"long\",\"doc\":\"FK to Customers table\"},{\"name\":\"address_type\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Type of address, can be: SHIPPING | BILLING\"},{\"name\":\"street_number\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Street number\"},{\"name\":\"street_name\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Street name\"},{\"name\":\"city\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"City\"},{\"name\":\"state\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"State\"},{\"name\":\"country\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Country\"},{\"name\":\"postcode\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Postcode\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -74,7 +74,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
   /** FK to Customers table */
    private long customer_id;
-  /** Type of address, can be: HOME | WORK | BOX */
+  /** Type of address, can be: SHIPPING | BILLING */
    private java.lang.String address_type;
   /** Street number */
    private java.lang.String street_number;
@@ -99,7 +99,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
   /**
    * All-args constructor.
    * @param customer_id FK to Customers table
-   * @param address_type Type of address, can be: HOME | WORK | BOX
+   * @param address_type Type of address, can be: SHIPPING | BILLING
    * @param street_number Street number
    * @param street_name Street name
    * @param city City
@@ -171,7 +171,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
   /**
    * Gets the value of the 'address_type' field.
-   * @return Type of address, can be: HOME | WORK | BOX
+   * @return Type of address, can be: SHIPPING | BILLING
    */
   public java.lang.String getAddressType() {
     return address_type;
@@ -180,7 +180,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
   /**
    * Sets the value of the 'address_type' field.
-   * Type of address, can be: HOME | WORK | BOX
+   * Type of address, can be: SHIPPING | BILLING
    * @param value the value to set.
    */
   public void setAddressType(java.lang.String value) {
@@ -338,7 +338,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
     /** FK to Customers table */
     private long customer_id;
-    /** Type of address, can be: HOME | WORK | BOX */
+    /** Type of address, can be: SHIPPING | BILLING */
     private java.lang.String address_type;
     /** Street number */
     private java.lang.String street_number;
@@ -483,7 +483,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
     /**
       * Gets the value of the 'address_type' field.
-      * Type of address, can be: HOME | WORK | BOX
+      * Type of address, can be: SHIPPING | BILLING
       * @return The value.
       */
     public java.lang.String getAddressType() {
@@ -493,7 +493,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
     /**
       * Sets the value of the 'address_type' field.
-      * Type of address, can be: HOME | WORK | BOX
+      * Type of address, can be: SHIPPING | BILLING
       * @param value The value of 'address_type'.
       * @return This builder.
       */
@@ -506,7 +506,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
     /**
       * Checks whether the 'address_type' field has been set.
-      * Type of address, can be: HOME | WORK | BOX
+      * Type of address, can be: SHIPPING | BILLING
       * @return True if the 'address_type' field has been set, false otherwise.
       */
     public boolean hasAddressType() {
@@ -516,7 +516,7 @@ public class Address extends org.apache.avro.specific.SpecificRecordBase impleme
 
     /**
       * Clears the value of the 'address_type' field.
-      * Type of address, can be: HOME | WORK | BOX
+      * Type of address, can be: SHIPPING | BILLING
       * @return This builder.
       */
     public org.cdc_demo.data_faker.avro_generated.Address.Builder clearAddressType() {

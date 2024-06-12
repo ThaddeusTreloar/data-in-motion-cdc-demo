@@ -17,37 +17,29 @@ public class DecisionTree {
         PROGRESS_SHIPMENT
     }
 
-    public Decision getDecision(List<Tuple<Long, Order>> orders, List<Tuple<Long, Shipment>> shipments) {
+    public Decision getDecision(List<Tuple<Long, Order>> orders) {
         var has_existing_order = orders.size() > 0;
-        var has_existing_shipment = shipments.size() > 0;
-        var all_orders_completed = orders.stream().allMatch(o -> o.y.getOrderStatus() == "COMPLETED" || o.y.getOrderStatus() == "CANCELLED");
 
-        // If the customer has no order, create one
+        var pending_order = orders.stream().anyMatch(o -> o.y.getOrderStatus() == "PENDING");
+        var shipped_order = orders.stream().anyMatch(o -> o.y.getOrderStatus() == "SHIPPED");
+
         if (!has_existing_order) {
+            // If the customer has no order, create one
             return Decision.CREATE_ORDER;
-        }
-
-        // If the customer has no shipment, create one
-        if (!has_existing_shipment) {
-            return Decision.CREATE_SHIPMENT;
-        }
-
-        // If there is an unfinished order, make a decision
-        // The unfinished order will either be PENDING or SHIPPED
-        if (!all_orders_completed) {
+        } else if (pending_order) {
+            // If the customer has a pending order, decide whether to create a shipment or cancel the order
             var action = faker.number().numberBetween(0, 10);
 
-            var order_shipped = orders.stream().anyMatch(o -> o.y.getOrderStatus() == "SHIPPED");
-
-            // If the unfinished order has been shipped, progress the shipment
-            // otherwise, decide to cancel the order or progress the shipment
-            if (order_shipped || action<9) {
-                return Decision.PROGRESS_SHIPMENT;
+            if (action < 9) {
+                return Decision.CREATE_SHIPMENT;
             } else {
                 return Decision.CANCEL_ORDER;
             }
+        } else if (shipped_order) {
+            // If the customer has a shipped order, progress the shipment
+            return Decision.PROGRESS_SHIPMENT;
         } else {
-            // If all orders are completed, create a new order
+            // Otherwise, create a new order
             return Decision.CREATE_ORDER;
         }
     }

@@ -1,0 +1,17 @@
+CREATE TABLE order_events (
+    order_id BIGINT,
+    event_type STRING,
+    order_date STRING,
+    total_price DECIMAL(10, 2),
+    order_status STRING,
+    order_updated_on TIMESTAMP_LTZ(3),
+    items STRING,
+    shipments STRING,
+    delivery_address STRING,
+    customer STRING,
+    PRIMARY KEY (order_id) NOT ENFORCED
+) WITH (
+  'changelog.mode' = 'upsert',
+  'key.format' = 'json-registry',
+  'value.format' = 'json-registry'
+)

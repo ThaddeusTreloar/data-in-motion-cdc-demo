@@ -1,0 +1,30 @@
+CREATE TABLE enriched_customer_data (
+  customer_id BIGINT,
+  title STRING,
+  customer_name STRING,
+  dob DATE,
+  contact_id BIGINT,
+  email STRING,
+  mobile STRING,
+  twitter STRING,
+  instagram STRING,
+  delivery_address_id BIGINT,
+  delivery_street_number STRING,
+  delivery_street_name STRING,
+  delivery_city STRING,
+  delivery_state STRING,
+  delivery_country STRING,
+  delivery_postcode STRING,
+  billing_address_id BIGINT,
+  billing_street_number STRING,
+  billing_street_name STRING,
+  billing_city STRING,
+  billing_state STRING,
+  billing_country STRING,
+  billing_postcode STRING,
+  rowtime TIMESTAMP(3),
+  WATERMARK FOR rowtime AS rowtime,
+  PRIMARY KEY (customer_id) NOT ENFORCED
+) WITH (
+  'changelog.mode' = 'upsert'
+)

@@ -1,0 +1,21 @@
+CREATE TABLE enriched_orders (
+  order_id BIGINT,
+  customer_id BIGINT,
+  order_date DATE,
+  total_price FLOAT,
+  order_status STRING,
+  updated_on TIMESTAMP_LTZ(3),
+  items STRING,
+  shipping_address BIGINT,
+  statement_action STRING,
+  shipment_id BIGINT,
+  shipment_created_on TIMESTAMP_LTZ(3),
+  shipped_on TIMESTAMP_LTZ(3),
+  shipment_updated_on TIMESTAMP_LTZ(3),
+  shipment_status STRING,
+  rowtime TIMESTAMP(3),
+  WATERMARK FOR rowtime AS rowtime,
+  PRIMARY KEY (order_id) NOT ENFORCED
+) WITH (
+  'changelog.mode' = 'upsert'
+)

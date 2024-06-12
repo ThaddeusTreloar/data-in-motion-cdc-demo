@@ -31,6 +31,12 @@ public class Generator {
 	public static String DEFAULT_ORDER_STATE = "PENDING";
 	public static String DEFAULT_SHIPMENT_STATE = "SHIPPED";
 
+	public static String SHIPPING_ADDRESS_TYPE = "SHIPPING";
+	public static String BILLING_ADDRESS_TYPE = "BILLING";
+
+	public static String INSERT_ACTION = "INSERT";
+    public static String UPDATE_ACTION = "UPDATE";
+
 	public long generateLong(int max) {
 		return faker.number().numberBetween(0, max-1);
 	}
@@ -58,10 +64,36 @@ public class Generator {
 			.build();
 	}
 
-	public Address generateAddress(long customerId) {
+	public Address generateShippingAddress(long customerId) {
 		return Address.newBuilder()
 			.setCustomerId(customerId)
-			.setAddressType("HOME")
+			.setAddressType(SHIPPING_ADDRESS_TYPE)
+			.setStreetNumber(faker.address().buildingNumber())
+			.setStreetName(faker.address().streetName())
+			.setCity(faker.address().city())
+			.setState(faker.address().state())
+			.setCountry(faker.address().country())
+			.setPostcode(faker.address().zipCode())
+			.build();
+	}
+
+	public Address generateBillingAddress(long customerId, Address shippingAddress) {
+		return Address.newBuilder()
+			.setCustomerId(customerId)
+			.setAddressType(BILLING_ADDRESS_TYPE)
+			.setStreetNumber(shippingAddress.getStreetNumber())
+			.setStreetName(shippingAddress.getStreetName())
+			.setCity(shippingAddress.getCity())
+			.setState(shippingAddress.getState())
+			.setCountry(shippingAddress.getCountry())
+			.setPostcode(shippingAddress.getPostcode())
+			.build();
+	}
+
+	public Address generateBillingAddress(long customerId) {
+		return Address.newBuilder()
+			.setCustomerId(customerId)
+			.setAddressType(BILLING_ADDRESS_TYPE)
 			.setStreetNumber(faker.address().buildingNumber())
 			.setStreetName(faker.address().streetName())
 			.setCity(faker.address().city())
@@ -79,13 +111,15 @@ public class Generator {
 			.build();
 	}
 
-	public Order generateOrder(long customerId) {
+	public Order generateOrder(long customer_id, long shipping_address_id, int item_count) {
 		return Order.newBuilder()
-			.setCustomerId(customerId)
-			.setShippingAddress(customerId)
+			.setCustomerId(customer_id)
+			.setShippingAddress(shipping_address_id)
 			.setOrderDate(LocalDate.now())
 			.setOrderStatus(DEFAULT_ORDER_STATE)
 			.setUpdatedOn(Instant.now())
+			.setLineItemCount(item_count)
+			.setStatementAction(INSERT_ACTION)
 			.build();
 	}
 
@@ -96,6 +130,7 @@ public class Generator {
 			.setShippedOn(Instant.now())
 			.setShipmentStatus(DEFAULT_SHIPMENT_STATE)
 			.setUpdatedOn(Instant.now())
+			.setStatementAction(INSERT_ACTION)
 			.build();
 	}
 
@@ -119,13 +154,15 @@ public class Generator {
 				.collect(Collectors.toSet())
 		);
 
+		no_items = order_products.size();
+
 		var quantities = IntStream.range(0, no_items)
 			.mapToObj(i -> faker.number().numberBetween(1, 10))
 			.toList();
 
 		var prices = IntStream
 			.range(0, no_items)
-			.mapToObj(i -> products.get((long)i).getListPrice() * quantities.get(i))
+			.mapToObj(i -> products.get((long) order_products.get(i)).getListPrice() * quantities.get(i))
 			.toList();
 
 		ArrayList<OrderLineItem> items = new ArrayList<OrderLineItem>();

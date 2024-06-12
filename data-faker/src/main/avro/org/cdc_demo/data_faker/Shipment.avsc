@@ -33,6 +33,11 @@
       "name": "shipment_status",
       "type": "string",
       "doc": "Shipment status. Can be: SHIPPED | DELIVERED"
+    },
+    {
+      "name": "statement_action",
+      "type": "string",
+      "doc": "SQL action for this record. Can be INSERT | UPDATE | DELETE"
     }
   ],
   "name": "Shipment",

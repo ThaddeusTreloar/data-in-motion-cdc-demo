@@ -24,12 +24,22 @@
       "doc": "Order state. Can be PENDING | SHIPPED | COMPLETED | CANCELLED"
     },
     {
+      "name": "line_item_count",
+      "type": "int",
+      "doc": "Number of line items in the order"
+    },
+    {
       "name": "updated_on",
       "type": {
         "type": "long",
         "logicalType": "timestamp-millis"
       },
       "doc": "Shipment update time"
+    },
+    {
+      "name": "statement_action",
+      "type": "string",
+      "doc": "SQL action for this record. Can be INSERT | UPDATE | DELETE"
     }
   ],
   "name": "Order",

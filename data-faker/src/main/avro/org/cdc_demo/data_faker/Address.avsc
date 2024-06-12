@@ -8,7 +8,7 @@
     {
       "name": "address_type",
       "type": "string",
-      "doc": "Type of address, can be: HOME | WORK | BOX"
+      "doc": "Type of address, can be: SHIPPING | BILLING"
     },
     {
       "name": "street_number",

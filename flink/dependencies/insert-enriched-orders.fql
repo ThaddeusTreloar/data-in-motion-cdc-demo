@@ -1,0 +1,88 @@
+INSERT INTO enriched_orders
+WITH order_table AS (
+    SELECT 
+        o.id as order_id,
+        o.customer_id,
+        o.shipping_address,
+        o.order_date,
+        o.order_status,
+        o.line_item_count,
+        o.updated_on,
+        o.statement_action
+    FROM orders o
+),
+order_line_table AS (
+    SELECT 
+        order_id, 
+        SUM(line_total) as total_price, 
+        COUNT(o.id) as item_count,
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'order_line_id' VALUE o.id, 
+                'product_id' VALUE p.id, 
+                'product_name' VALUE p.product_name, 
+                'quantity' VALUE quantity
+            )
+        ) as items
+    FROM `order-line-items` o
+    JOIN products p
+    ON o.product_id = p.id
+    GROUP BY order_id
+), order_with_items AS (
+    SELECT 
+        o.order_id,
+        o.customer_id,
+        o.shipping_address,
+        o.order_date,
+        o.order_status,
+        o.line_item_count,
+        o.updated_on,
+        ol.total_price,
+        ol.items,
+        o.statement_action
+    FROM order_table o
+    JOIN order_line_table ol
+    ON o.order_id = ol.order_id
+    WHERE o.line_item_count = ol.item_count
+), delivery_address_table AS (
+    SELECT 
+        d.id as order_delivery_address_id,
+        d.customer_id as customer_id,
+        d.street_number as order_street_number,
+        d.street_name as order_street_name,
+        d.city as order_city,
+        d.state as order_state,
+        d.country as order_country,
+        d.postcode as order_postcode
+    FROM (
+        SELECT 
+            *,
+            ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY $rowtime DESC) as row_num
+        FROM addresses
+        WHERE address_type = 'SHIPPING'
+    ) d
+    where d.row_num = 1
+),
+order_with_delivery_address AS (
+    SELECT 
+        o.order_id, 
+        o.customer_id, 
+        o.order_date, 
+        o.total_price,
+        o.order_status, 
+        o.updated_on,
+        o.items,
+        d.order_delivery_address_id,
+        d.order_street_number,
+        d.order_street_name,
+        d.order_city,
+        d.order_state,
+        d.order_country,
+        d.order_postcode,
+        o.statement_action
+    FROM order_with_items o
+    JOIN delivery_address_table d
+    ON o.shipping_address = d.order_delivery_address_id
+)
+
+SELECT * FROM order_with_delivery_address

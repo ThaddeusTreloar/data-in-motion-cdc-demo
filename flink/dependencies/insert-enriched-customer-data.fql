@@ -1,0 +1,118 @@
+INSERT INTO enriched_customer_data
+WITH customer_table AS (
+    SELECT 
+        c.id as customer_id,
+        c.title,
+        c.customer_name,
+        c.dob,
+        rowtime
+    FROM (
+        SELECT 
+            *,
+            ROW_NUMBER() OVER (PARTITION BY id ORDER BY $rowtime DESC) as row_num,
+            $rowtime as rowtime
+        FROM customers
+    ) c
+    WHERE c.row_num = 1
+),
+contact_table AS (
+    SELECT 
+        d.id as contact_id,
+        d.customer_id as customer_id,
+        d.email,
+        d.mobile,
+        d.twitter,
+        d.instagram,
+        rowtime
+    FROM (
+        SELECT 
+            *,
+            ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY $rowtime DESC) as row_num,
+            $rowtime as rowtime
+        FROM contacts
+    ) d
+    WHERE d.row_num = 1
+),
+delivery_address_table AS (
+    SELECT 
+        d.id as delivery_address_id,
+        d.customer_id as customer_id,
+        d.street_number as delivery_street_number,
+        d.street_name as delivery_street_name,
+        d.city as delivery_city,
+        d.state as delivery_state,
+        d.country as delivery_country,
+        d.postcode as delivery_postcode,
+        rowtime
+    FROM (
+        SELECT 
+            *,
+            ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY $rowtime DESC) as row_num,
+            $rowtime as rowtime
+        FROM addresses
+        WHERE address_type = 'SHIPPING'
+    ) d
+    where d.row_num = 1
+),
+billing_address_table AS (
+    SELECT 
+        d.id as billing_address_id,
+        d.customer_id as customer_id,
+        d.street_number as billing_street_number,
+        d.street_name as billing_street_name,
+        d.city as billing_city,
+        d.state as billing_state,
+        d.country as billing_country,
+        d.postcode as billing_postcode,
+        rowtime
+    FROM (
+        SELECT 
+            *,
+            ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY $rowtime DESC) as row_num,
+            $rowtime as rowtime
+        FROM addresses
+        WHERE address_type = 'BILLING'
+    ) d
+    where d.row_num = 1
+),
+enriched_customer_data AS (
+    SELECT
+        c.customer_id,
+        c.title,
+        c.customer_name,
+        c.dob,
+        co.contact_id,
+        co.email,
+        co.mobile,
+        co.twitter,
+        co.instagram,
+        d.delivery_address_id,
+        d.delivery_street_number,
+        d.delivery_street_name,
+        d.delivery_city,
+        d.delivery_state,
+        d.delivery_country,
+        d.delivery_postcode,
+        b.billing_address_id,
+        b.billing_street_number,
+        b.billing_street_name,
+        b.billing_city,
+        b.billing_state,
+        b.billing_country,
+        b.billing_postcode,
+        CASE
+            WHEN c.rowtime > co.rowtime AND c.rowtime > d.rowtime AND c.rowtime > b.rowtime THEN c.rowtime
+            WHEN co.rowtime > c.rowtime AND co.rowtime > d.rowtime AND co.rowtime > b.rowtime THEN co.rowtime
+            WHEN d.rowtime > c.rowtime AND d.rowtime > co.rowtime AND d.rowtime > b.rowtime THEN d.rowtime
+            ELSE b.rowtime
+        END as rowtime
+    FROM customer_table c
+    INNER JOIN contact_table co
+    ON c.customer_id = co.customer_id
+    INNER JOIN delivery_address_table d
+    ON c.customer_id = d.customer_id
+    INNER JOIN billing_address_table b
+    ON c.customer_id = b.customer_id
+)
+
+SELECT * FROM enriched_customer_data

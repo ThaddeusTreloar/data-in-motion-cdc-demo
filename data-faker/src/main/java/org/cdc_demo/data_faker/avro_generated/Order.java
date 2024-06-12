@@ -15,8 +15,8 @@ import org.apache.avro.message.SchemaStore;
 /** Order table row */
 @org.apache.avro.specific.AvroGenerated
 public class Order extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -3727399735725860304L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Order\",\"namespace\":\"org.cdc_demo.data_faker.avro_generated\",\"doc\":\"Order table row\",\"fields\":[{\"name\":\"customer_id\",\"type\":\"long\",\"doc\":\"FK to Customers table\"},{\"name\":\"shipping_address\",\"type\":\"long\",\"doc\":\"FK to Address table\"},{\"name\":\"order_date\",\"type\":{\"type\":\"int\",\"logicalType\":\"date\"},\"doc\":\"Shipment create time\"},{\"name\":\"order_status\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Order state. Can be PENDING | SHIPPED | COMPLETED | CANCELLED\"},{\"name\":\"updated_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment update time\"}]}");
+  private static final long serialVersionUID = -5365686476691607966L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Order\",\"namespace\":\"org.cdc_demo.data_faker.avro_generated\",\"doc\":\"Order table row\",\"fields\":[{\"name\":\"customer_id\",\"type\":\"long\",\"doc\":\"FK to Customers table\"},{\"name\":\"shipping_address\",\"type\":\"long\",\"doc\":\"FK to Address table\"},{\"name\":\"order_date\",\"type\":{\"type\":\"int\",\"logicalType\":\"date\"},\"doc\":\"Shipment create time\"},{\"name\":\"order_status\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Order state. Can be PENDING | SHIPPED | COMPLETED | CANCELLED\"},{\"name\":\"line_item_count\",\"type\":\"int\",\"doc\":\"Number of line items in the order\"},{\"name\":\"updated_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment update time\"},{\"name\":\"statement_action\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"SQL action for this record. Can be INSERT | UPDATE | DELETE\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -84,8 +84,12 @@ static {
    private java.time.LocalDate order_date;
   /** Order state. Can be PENDING | SHIPPED | COMPLETED | CANCELLED */
    private java.lang.String order_status;
+  /** Number of line items in the order */
+   private int line_item_count;
   /** Shipment update time */
    private java.time.Instant updated_on;
+  /** SQL action for this record. Can be INSERT | UPDATE | DELETE */
+   private java.lang.String statement_action;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -100,14 +104,18 @@ static {
    * @param shipping_address FK to Address table
    * @param order_date Shipment create time
    * @param order_status Order state. Can be PENDING | SHIPPED | COMPLETED | CANCELLED
+   * @param line_item_count Number of line items in the order
    * @param updated_on Shipment update time
+   * @param statement_action SQL action for this record. Can be INSERT | UPDATE | DELETE
    */
-  public Order(java.lang.Long customer_id, java.lang.Long shipping_address, java.time.LocalDate order_date, java.lang.String order_status, java.time.Instant updated_on) {
+  public Order(java.lang.Long customer_id, java.lang.Long shipping_address, java.time.LocalDate order_date, java.lang.String order_status, java.lang.Integer line_item_count, java.time.Instant updated_on, java.lang.String statement_action) {
     this.customer_id = customer_id;
     this.shipping_address = shipping_address;
     this.order_date = order_date;
     this.order_status = order_status;
+    this.line_item_count = line_item_count;
     this.updated_on = updated_on.truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
+    this.statement_action = statement_action;
   }
 
   public org.apache.avro.specific.SpecificData getSpecificData() { return MODEL$; }
@@ -119,7 +127,9 @@ static {
     case 1: return shipping_address;
     case 2: return order_date;
     case 3: return order_status;
-    case 4: return updated_on;
+    case 4: return line_item_count;
+    case 5: return updated_on;
+    case 6: return statement_action;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -130,7 +140,9 @@ static {
       null,
       new org.apache.avro.data.TimeConversions.DateConversion(),
       null,
+      null,
       new org.apache.avro.data.TimeConversions.TimestampMillisConversion(),
+      null,
       null
   };
 
@@ -147,7 +159,9 @@ static {
     case 1: shipping_address = (java.lang.Long)value$; break;
     case 2: order_date = (java.time.LocalDate)value$; break;
     case 3: order_status = value$ != null ? value$.toString() : null; break;
-    case 4: updated_on = (java.time.Instant)value$; break;
+    case 4: line_item_count = (java.lang.Integer)value$; break;
+    case 5: updated_on = (java.time.Instant)value$; break;
+    case 6: statement_action = value$ != null ? value$.toString() : null; break;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -225,6 +239,24 @@ static {
   }
 
   /**
+   * Gets the value of the 'line_item_count' field.
+   * @return Number of line items in the order
+   */
+  public int getLineItemCount() {
+    return line_item_count;
+  }
+
+
+  /**
+   * Sets the value of the 'line_item_count' field.
+   * Number of line items in the order
+   * @param value the value to set.
+   */
+  public void setLineItemCount(int value) {
+    this.line_item_count = value;
+  }
+
+  /**
    * Gets the value of the 'updated_on' field.
    * @return Shipment update time
    */
@@ -240,6 +272,24 @@ static {
    */
   public void setUpdatedOn(java.time.Instant value) {
     this.updated_on = value.truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
+  }
+
+  /**
+   * Gets the value of the 'statement_action' field.
+   * @return SQL action for this record. Can be INSERT | UPDATE | DELETE
+   */
+  public java.lang.String getStatementAction() {
+    return statement_action;
+  }
+
+
+  /**
+   * Sets the value of the 'statement_action' field.
+   * SQL action for this record. Can be INSERT | UPDATE | DELETE
+   * @param value the value to set.
+   */
+  public void setStatementAction(java.lang.String value) {
+    this.statement_action = value;
   }
 
   /**
@@ -291,8 +341,12 @@ static {
     private java.time.LocalDate order_date;
     /** Order state. Can be PENDING | SHIPPED | COMPLETED | CANCELLED */
     private java.lang.String order_status;
+    /** Number of line items in the order */
+    private int line_item_count;
     /** Shipment update time */
     private java.time.Instant updated_on;
+    /** SQL action for this record. Can be INSERT | UPDATE | DELETE */
+    private java.lang.String statement_action;
 
     /** Creates a new Builder */
     private Builder() {
@@ -321,9 +375,17 @@ static {
         this.order_status = data().deepCopy(fields()[3].schema(), other.order_status);
         fieldSetFlags()[3] = other.fieldSetFlags()[3];
       }
-      if (isValidValue(fields()[4], other.updated_on)) {
-        this.updated_on = data().deepCopy(fields()[4].schema(), other.updated_on);
+      if (isValidValue(fields()[4], other.line_item_count)) {
+        this.line_item_count = data().deepCopy(fields()[4].schema(), other.line_item_count);
         fieldSetFlags()[4] = other.fieldSetFlags()[4];
+      }
+      if (isValidValue(fields()[5], other.updated_on)) {
+        this.updated_on = data().deepCopy(fields()[5].schema(), other.updated_on);
+        fieldSetFlags()[5] = other.fieldSetFlags()[5];
+      }
+      if (isValidValue(fields()[6], other.statement_action)) {
+        this.statement_action = data().deepCopy(fields()[6].schema(), other.statement_action);
+        fieldSetFlags()[6] = other.fieldSetFlags()[6];
       }
     }
 
@@ -349,9 +411,17 @@ static {
         this.order_status = data().deepCopy(fields()[3].schema(), other.order_status);
         fieldSetFlags()[3] = true;
       }
-      if (isValidValue(fields()[4], other.updated_on)) {
-        this.updated_on = data().deepCopy(fields()[4].schema(), other.updated_on);
+      if (isValidValue(fields()[4], other.line_item_count)) {
+        this.line_item_count = data().deepCopy(fields()[4].schema(), other.line_item_count);
         fieldSetFlags()[4] = true;
+      }
+      if (isValidValue(fields()[5], other.updated_on)) {
+        this.updated_on = data().deepCopy(fields()[5].schema(), other.updated_on);
+        fieldSetFlags()[5] = true;
+      }
+      if (isValidValue(fields()[6], other.statement_action)) {
+        this.statement_action = data().deepCopy(fields()[6].schema(), other.statement_action);
+        fieldSetFlags()[6] = true;
       }
     }
 
@@ -529,6 +599,49 @@ static {
     }
 
     /**
+      * Gets the value of the 'line_item_count' field.
+      * Number of line items in the order
+      * @return The value.
+      */
+    public int getLineItemCount() {
+      return line_item_count;
+    }
+
+
+    /**
+      * Sets the value of the 'line_item_count' field.
+      * Number of line items in the order
+      * @param value The value of 'line_item_count'.
+      * @return This builder.
+      */
+    public org.cdc_demo.data_faker.avro_generated.Order.Builder setLineItemCount(int value) {
+      validate(fields()[4], value);
+      this.line_item_count = value;
+      fieldSetFlags()[4] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'line_item_count' field has been set.
+      * Number of line items in the order
+      * @return True if the 'line_item_count' field has been set, false otherwise.
+      */
+    public boolean hasLineItemCount() {
+      return fieldSetFlags()[4];
+    }
+
+
+    /**
+      * Clears the value of the 'line_item_count' field.
+      * Number of line items in the order
+      * @return This builder.
+      */
+    public org.cdc_demo.data_faker.avro_generated.Order.Builder clearLineItemCount() {
+      fieldSetFlags()[4] = false;
+      return this;
+    }
+
+    /**
       * Gets the value of the 'updated_on' field.
       * Shipment update time
       * @return The value.
@@ -545,9 +658,9 @@ static {
       * @return This builder.
       */
     public org.cdc_demo.data_faker.avro_generated.Order.Builder setUpdatedOn(java.time.Instant value) {
-      validate(fields()[4], value);
+      validate(fields()[5], value);
       this.updated_on = value.truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
-      fieldSetFlags()[4] = true;
+      fieldSetFlags()[5] = true;
       return this;
     }
 
@@ -557,7 +670,7 @@ static {
       * @return True if the 'updated_on' field has been set, false otherwise.
       */
     public boolean hasUpdatedOn() {
-      return fieldSetFlags()[4];
+      return fieldSetFlags()[5];
     }
 
 
@@ -567,7 +680,51 @@ static {
       * @return This builder.
       */
     public org.cdc_demo.data_faker.avro_generated.Order.Builder clearUpdatedOn() {
-      fieldSetFlags()[4] = false;
+      fieldSetFlags()[5] = false;
+      return this;
+    }
+
+    /**
+      * Gets the value of the 'statement_action' field.
+      * SQL action for this record. Can be INSERT | UPDATE | DELETE
+      * @return The value.
+      */
+    public java.lang.String getStatementAction() {
+      return statement_action;
+    }
+
+
+    /**
+      * Sets the value of the 'statement_action' field.
+      * SQL action for this record. Can be INSERT | UPDATE | DELETE
+      * @param value The value of 'statement_action'.
+      * @return This builder.
+      */
+    public org.cdc_demo.data_faker.avro_generated.Order.Builder setStatementAction(java.lang.String value) {
+      validate(fields()[6], value);
+      this.statement_action = value;
+      fieldSetFlags()[6] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'statement_action' field has been set.
+      * SQL action for this record. Can be INSERT | UPDATE | DELETE
+      * @return True if the 'statement_action' field has been set, false otherwise.
+      */
+    public boolean hasStatementAction() {
+      return fieldSetFlags()[6];
+    }
+
+
+    /**
+      * Clears the value of the 'statement_action' field.
+      * SQL action for this record. Can be INSERT | UPDATE | DELETE
+      * @return This builder.
+      */
+    public org.cdc_demo.data_faker.avro_generated.Order.Builder clearStatementAction() {
+      statement_action = null;
+      fieldSetFlags()[6] = false;
       return this;
     }
 
@@ -580,7 +737,9 @@ static {
         record.shipping_address = fieldSetFlags()[1] ? this.shipping_address : (java.lang.Long) defaultValue(fields()[1]);
         record.order_date = fieldSetFlags()[2] ? this.order_date : (java.time.LocalDate) defaultValue(fields()[2]);
         record.order_status = fieldSetFlags()[3] ? this.order_status : (java.lang.String) defaultValue(fields()[3]);
-        record.updated_on = fieldSetFlags()[4] ? this.updated_on : (java.time.Instant) defaultValue(fields()[4]);
+        record.line_item_count = fieldSetFlags()[4] ? this.line_item_count : (java.lang.Integer) defaultValue(fields()[4]);
+        record.updated_on = fieldSetFlags()[5] ? this.updated_on : (java.time.Instant) defaultValue(fields()[5]);
+        record.statement_action = fieldSetFlags()[6] ? this.statement_action : (java.lang.String) defaultValue(fields()[6]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;

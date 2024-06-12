@@ -1,7 +1,6 @@
 package org.cdc_demo.data_faker.biz;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.cdc_demo.data_faker.util.Generator;
 import org.cdc_demo.data_faker.util.Topic;
 import org.cdc_demo.data_faker.util.Topics;
 import org.cdc_demo.data_faker.util.Tuple;
-import org.cdc_demo.data_faker.util.DecisionTree.Decision;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,15 +39,15 @@ public class Runner {
     private KafkaProducer<TableId, OrderLineItem> order_line_item_producer;
 
     // Data structures to store initial data
-    private HashMap<Long, Address> addresses = new HashMap<>();
     private HashMap<Long, Contact> contacts = new HashMap<>();
     private HashMap<Long, Customer> customers = new HashMap<>();
     private HashMap<Long, Product> products = new HashMap<>();
-
+    
     // Data structures to store ongoing data
-    private ArrayList<OrderLineItem> order_line_items = new ArrayList<OrderLineItem>();
-    private ArrayList<Order> orders = new ArrayList<Order>();
-    private ArrayList<Shipment> shipments = new ArrayList<Shipment>();
+    private ArrayList<Address> addresses = new ArrayList<>();
+    private ArrayList<OrderLineItem> order_line_items = new ArrayList<>();
+    private ArrayList<Order> orders = new ArrayList<>();
+    private ArrayList<Shipment> shipments = new ArrayList<>();
 
     private Generator generator = new Generator();
 
@@ -63,20 +61,24 @@ public class Runner {
                 topic.getValueSerde().serializer());
     }
 
-    private void createOrder(long cusomer_id) {
+    private void createOrder(long customer_id) {
         var order_id = (long) this.orders.size();
 
         // Create order line items
         var order_line_items = generator
             .generateOrderItems(order_id, this.products);
 
-        var order = Order.newBuilder()
-                .setCustomerId(cusomer_id)
-                .setOrderDate(LocalDate.now())
-                .setOrderStatus("PENDING")
-                .setShippingAddress(cusomer_id)
-                .setUpdatedOn(Instant.now())
-                .build();
+        var item_count = order_line_items.size();
+
+        var shipping_address_id = IntStream
+            .range(0, this.addresses.size())
+            .filter(
+                i -> this.addresses.get(i).getCustomerId() == customer_id &&
+                     this.addresses.get(i).getAddressType().equals(Generator.SHIPPING_ADDRESS_TYPE)
+            ).findFirst()
+            .getAsInt();
+
+        var order = generator.generateOrder(customer_id, shipping_address_id, item_count);
 
         order_line_items
             .forEach(order_line_item -> {
@@ -123,6 +125,8 @@ public class Runner {
             .anyMatch(shipment -> shipment.getOrderId() == order_id);
 
         if (order_has_shipment) {
+            log.info("Order already has a shipment, progressing shipment instead");
+
             var shipment_id = IntStream
                 .range(0, this.shipments.size())
                 .filter(i -> this.shipments.get(i).getOrderId() == order_id)
@@ -160,6 +164,7 @@ public class Runner {
 
         order.setOrderStatus(status);
         order.setUpdatedOn(Instant.now());
+        order.setStatementAction(Generator.UPDATE_ACTION);
 
         try {
             var response = order_producer.send(
@@ -181,6 +186,7 @@ public class Runner {
 
         shipment.setShipmentStatus("DELIVERED");
         shipment.setUpdatedOn(Instant.now());
+        shipment.setStatementAction(Generator.UPDATE_ACTION);
 
         try {
             var response = shipment_producer.send(
@@ -220,6 +226,7 @@ public class Runner {
 
         order.setOrderStatus("CANCELLED");
         order.setUpdatedOn(Instant.now());
+        order.setStatementAction(Generator.UPDATE_ACTION);
 
         try {
             var response = order_producer.send(
@@ -256,20 +263,27 @@ public class Runner {
                 var table_id = TableId.newBuilder().setId(i).build();
                 var customer = generator.generateCustomer();
                 var contact = generator.generateContact(table_id.getId(), customer);
-                var address = generator.generateAddress(table_id.getId());
+                var shipping_address = generator.generateShippingAddress(table_id.getId());
+                var billing_address = generator.generateBillingAddress(table_id.getId(), shipping_address);
 
                 customer_producer.send(new ProducerRecord<>(topics.getCustomers().getName(), table_id, customer));
+                customers.put(table_id.getId(), customer);
+                
                 contact_producer.send(new ProducerRecord<>(topics.getContacts().getName(), table_id, contact));
-                address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), table_id, address));
+                contacts.put(table_id.getId(), contact);
+
+                var address_id = TableId.newBuilder().setId((long) addresses.size()).build();
+                address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), address_id, shipping_address));
+                addresses.add(shipping_address);
+
+                address_id = TableId.newBuilder().setId((long) addresses.size()).build();
+                address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), address_id, billing_address));
+                addresses.add(billing_address);
 
                 log.info("Table ID: {}", table_id);
                 log.info("Customer: {}", customer);
                 log.info("Contact: {}", contact);
-                log.info("Address: {}", address);
-
-                customers.put(table_id.getId(), customer);
-                contacts.put(table_id.getId(), contact);
-                addresses.put(table_id.getId(), address);
+                log.info("Address: {}", shipping_address);
             }
 
             for (long i = 0; i < Generator.PRODUCT_POOL_SIZE; i++) {
@@ -298,12 +312,12 @@ public class Runner {
             var decicion_tree = new DecisionTree();
 
             while (true) {
-                var cusomer_id = generator.generateLong(Generator.CUSTOMER_POOL_SIZE);
+                var customer_id = generator.generateLong(Generator.CUSTOMER_POOL_SIZE);
 
                 List<Tuple<Long, Order>> existing_orders = IntStream
                         .range(0, orders.size())
                         .mapToObj(i -> new Tuple<>((long) i, orders.get(i)))
-                        .filter(order_tuple -> order_tuple.y.getCustomerId() == cusomer_id)
+                        .filter(order_tuple -> order_tuple.y.getCustomerId() == customer_id)
                         .collect(Collectors.toList());
 
                 List<Tuple<Long, Shipment>> existing_shipments = IntStream
@@ -315,14 +329,16 @@ public class Runner {
                                                 order_tuple -> order_tuple.x.equals(shipment_tuple.y.getOrderId())))
                         .collect(Collectors.toList());
 
-                var decision = decicion_tree.getDecision(existing_orders, existing_shipments);
+                var decision = decicion_tree.getDecision(existing_orders);
                 
                 var idx_last_order = existing_orders.size() - 1;
                 var idx_last_shipment = existing_shipments.size() - 1;
 
+                log.info("customer_id: {}, decision: {}", customer_id, decision);
+
                 switch (decision) {
                     case CREATE_ORDER:
-                        createOrder(cusomer_id);
+                        createOrder(customer_id);
                         break;
                     case CREATE_SHIPMENT:
                         createShipment(existing_orders.get(idx_last_order).x);
@@ -341,6 +357,7 @@ public class Runner {
             }
         } catch (Exception e) {
             System.out.println(e);
+            e.printStackTrace();
             System.exit(0);
         } finally {
             order_producer.close();

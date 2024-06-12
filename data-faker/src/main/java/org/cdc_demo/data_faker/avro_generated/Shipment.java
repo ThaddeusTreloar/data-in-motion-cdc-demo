@@ -15,8 +15,8 @@ import org.apache.avro.message.SchemaStore;
 /** Shipment table row */
 @org.apache.avro.specific.AvroGenerated
 public class Shipment extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -7673805427407758157L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Shipment\",\"namespace\":\"org.cdc_demo.data_faker.avro_generated\",\"doc\":\"Shipment table row\",\"fields\":[{\"name\":\"order_id\",\"type\":\"long\",\"doc\":\"FK to Orders table\"},{\"name\":\"created_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment create time\"},{\"name\":\"shipped_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment ship time\"},{\"name\":\"updated_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment update time\"},{\"name\":\"shipment_status\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Shipment status. Can be: SHIPPED | DELIVERED\"}]}");
+  private static final long serialVersionUID = -4220844396863955223L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Shipment\",\"namespace\":\"org.cdc_demo.data_faker.avro_generated\",\"doc\":\"Shipment table row\",\"fields\":[{\"name\":\"order_id\",\"type\":\"long\",\"doc\":\"FK to Orders table\"},{\"name\":\"created_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment create time\"},{\"name\":\"shipped_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment ship time\"},{\"name\":\"updated_on\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"},\"doc\":\"Shipment update time\"},{\"name\":\"shipment_status\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"Shipment status. Can be: SHIPPED | DELIVERED\"},{\"name\":\"statement_action\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"doc\":\"SQL action for this record. Can be INSERT | UPDATE | DELETE\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -85,6 +85,8 @@ static {
    private java.time.Instant updated_on;
   /** Shipment status. Can be: SHIPPED | DELIVERED */
    private java.lang.String shipment_status;
+  /** SQL action for this record. Can be INSERT | UPDATE | DELETE */
+   private java.lang.String statement_action;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -100,13 +102,15 @@ static {
    * @param shipped_on Shipment ship time
    * @param updated_on Shipment update time
    * @param shipment_status Shipment status. Can be: SHIPPED | DELIVERED
+   * @param statement_action SQL action for this record. Can be INSERT | UPDATE | DELETE
    */
-  public Shipment(java.lang.Long order_id, java.time.Instant created_on, java.time.Instant shipped_on, java.time.Instant updated_on, java.lang.String shipment_status) {
+  public Shipment(java.lang.Long order_id, java.time.Instant created_on, java.time.Instant shipped_on, java.time.Instant updated_on, java.lang.String shipment_status, java.lang.String statement_action) {
     this.order_id = order_id;
     this.created_on = created_on.truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
     this.shipped_on = shipped_on.truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
     this.updated_on = updated_on.truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
     this.shipment_status = shipment_status;
+    this.statement_action = statement_action;
   }
 
   public org.apache.avro.specific.SpecificData getSpecificData() { return MODEL$; }
@@ -119,6 +123,7 @@ static {
     case 2: return shipped_on;
     case 3: return updated_on;
     case 4: return shipment_status;
+    case 5: return statement_action;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -129,6 +134,7 @@ static {
       new org.apache.avro.data.TimeConversions.TimestampMillisConversion(),
       new org.apache.avro.data.TimeConversions.TimestampMillisConversion(),
       new org.apache.avro.data.TimeConversions.TimestampMillisConversion(),
+      null,
       null,
       null
   };
@@ -147,6 +153,7 @@ static {
     case 2: shipped_on = (java.time.Instant)value$; break;
     case 3: updated_on = (java.time.Instant)value$; break;
     case 4: shipment_status = value$ != null ? value$.toString() : null; break;
+    case 5: statement_action = value$ != null ? value$.toString() : null; break;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -242,6 +249,24 @@ static {
   }
 
   /**
+   * Gets the value of the 'statement_action' field.
+   * @return SQL action for this record. Can be INSERT | UPDATE | DELETE
+   */
+  public java.lang.String getStatementAction() {
+    return statement_action;
+  }
+
+
+  /**
+   * Sets the value of the 'statement_action' field.
+   * SQL action for this record. Can be INSERT | UPDATE | DELETE
+   * @param value the value to set.
+   */
+  public void setStatementAction(java.lang.String value) {
+    this.statement_action = value;
+  }
+
+  /**
    * Creates a new Shipment RecordBuilder.
    * @return A new Shipment RecordBuilder
    */
@@ -292,6 +317,8 @@ static {
     private java.time.Instant updated_on;
     /** Shipment status. Can be: SHIPPED | DELIVERED */
     private java.lang.String shipment_status;
+    /** SQL action for this record. Can be INSERT | UPDATE | DELETE */
+    private java.lang.String statement_action;
 
     /** Creates a new Builder */
     private Builder() {
@@ -324,6 +351,10 @@ static {
         this.shipment_status = data().deepCopy(fields()[4].schema(), other.shipment_status);
         fieldSetFlags()[4] = other.fieldSetFlags()[4];
       }
+      if (isValidValue(fields()[5], other.statement_action)) {
+        this.statement_action = data().deepCopy(fields()[5].schema(), other.statement_action);
+        fieldSetFlags()[5] = other.fieldSetFlags()[5];
+      }
     }
 
     /**
@@ -351,6 +382,10 @@ static {
       if (isValidValue(fields()[4], other.shipment_status)) {
         this.shipment_status = data().deepCopy(fields()[4].schema(), other.shipment_status);
         fieldSetFlags()[4] = true;
+      }
+      if (isValidValue(fields()[5], other.statement_action)) {
+        this.statement_action = data().deepCopy(fields()[5].schema(), other.statement_action);
+        fieldSetFlags()[5] = true;
       }
     }
 
@@ -570,6 +605,50 @@ static {
       return this;
     }
 
+    /**
+      * Gets the value of the 'statement_action' field.
+      * SQL action for this record. Can be INSERT | UPDATE | DELETE
+      * @return The value.
+      */
+    public java.lang.String getStatementAction() {
+      return statement_action;
+    }
+
+
+    /**
+      * Sets the value of the 'statement_action' field.
+      * SQL action for this record. Can be INSERT | UPDATE | DELETE
+      * @param value The value of 'statement_action'.
+      * @return This builder.
+      */
+    public org.cdc_demo.data_faker.avro_generated.Shipment.Builder setStatementAction(java.lang.String value) {
+      validate(fields()[5], value);
+      this.statement_action = value;
+      fieldSetFlags()[5] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'statement_action' field has been set.
+      * SQL action for this record. Can be INSERT | UPDATE | DELETE
+      * @return True if the 'statement_action' field has been set, false otherwise.
+      */
+    public boolean hasStatementAction() {
+      return fieldSetFlags()[5];
+    }
+
+
+    /**
+      * Clears the value of the 'statement_action' field.
+      * SQL action for this record. Can be INSERT | UPDATE | DELETE
+      * @return This builder.
+      */
+    public org.cdc_demo.data_faker.avro_generated.Shipment.Builder clearStatementAction() {
+      statement_action = null;
+      fieldSetFlags()[5] = false;
+      return this;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public Shipment build() {
@@ -580,6 +659,7 @@ static {
         record.shipped_on = fieldSetFlags()[2] ? this.shipped_on : (java.time.Instant) defaultValue(fields()[2]);
         record.updated_on = fieldSetFlags()[3] ? this.updated_on : (java.time.Instant) defaultValue(fields()[3]);
         record.shipment_status = fieldSetFlags()[4] ? this.shipment_status : (java.lang.String) defaultValue(fields()[4]);
+        record.statement_action = fieldSetFlags()[5] ? this.statement_action : (java.lang.String) defaultValue(fields()[5]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
