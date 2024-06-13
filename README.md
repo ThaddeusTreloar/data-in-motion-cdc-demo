@@ -66,12 +66,11 @@ confluent schema-registry region list
 
 ## Spinning up the deployment
 
-Once you have completed the setup, run the following setup command:
+Once you have completed the setup, run the following infrastructure startup command:
 ```
 cc_up.sh
 ```
 This will initialise the Confluent Cloud environment, along with all dependencies.  
-It will then run the streaming apps from the inital deployment in the blog, ready to start tinkering.
 
 ## Running the demo
 
