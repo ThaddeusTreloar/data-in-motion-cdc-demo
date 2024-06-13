@@ -119,3 +119,16 @@ down.sh
 ```
 
 This will clean up the Confluent environment, and stop the flink jobs.
+
+Note that sometimes there is a race condition where RBAC roles will be deleted before the environment is fully cleaned up.
+If this happens you can delete the environment manually through the Confluent Cloud UI.
+
+Also, be sure to check if any service accounts are still present by running:
+```
+confluent iam service-account list
+```
+
+and then deleting any accounts created by the demo (cluster-manager-sa, spring-app-sa):
+```
+confluent iam service-account delete <service account id (eg. sa-vv2k95)>
+```
