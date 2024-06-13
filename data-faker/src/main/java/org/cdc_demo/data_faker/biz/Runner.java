@@ -234,7 +234,7 @@ public class Runner {
                             topics.getOrders().getName(),
                             TableId.newBuilder().setId(order_id).build(),
                             order));
-
+                            
             log.info("Cancelled Order, order_id: {}, body: {}", order_id, order);
 
             response.get();
@@ -285,7 +285,7 @@ public class Runner {
                 log.info("Contact: {}", contact);
                 log.info("Address: {}", shipping_address);
             }
-            
+
             for (long i = 0; i < Generator.PRODUCT_POOL_SIZE; i++) {
                 var table_id = TableId.newBuilder().setId(i).build();
                 var product = generator.generateProduct();
@@ -301,13 +301,10 @@ public class Runner {
             System.out.println(e);
             System.exit(0);
         } finally {
-            customer_producer.close();
-            contact_producer.close();
-            address_producer.close();
             product_producer.close();
         }
 
-        System.exit(0);
+        var next_customer_id = 2000L;
 
         // Stream orders and shipments
         try {
@@ -354,6 +351,26 @@ public class Runner {
                     default:
                         break;
                 }
+
+                var table_id = TableId.newBuilder().setId(next_customer_id++).build();
+                var customer = generator.generateCustomer();
+                var contact = generator.generateContact(table_id.getId(), customer);
+                var shipping_address = generator.generateShippingAddress(table_id.getId());
+                var billing_address = generator.generateBillingAddress(table_id.getId(), shipping_address);
+
+                customer_producer.send(new ProducerRecord<>(topics.getCustomers().getName(), table_id, customer));
+                customers.put(table_id.getId(), customer);
+                
+                contact_producer.send(new ProducerRecord<>(topics.getContacts().getName(), table_id, contact));
+                contacts.put(table_id.getId(), contact);
+
+                var address_id = TableId.newBuilder().setId((long) addresses.size()).build();
+                address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), address_id, shipping_address));
+                addresses.add(shipping_address);
+
+                address_id = TableId.newBuilder().setId((long) addresses.size()).build();
+                address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), address_id, billing_address));
+                addresses.add(billing_address);
 
                 Thread.sleep(1000);
             }

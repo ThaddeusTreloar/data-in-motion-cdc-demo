@@ -3,12 +3,11 @@
 export TF_VAR_confluent_cloud_api_key=$CONFLUENT_CLOUD_API_KEY
 export TF_VAR_confluent_cloud_api_secret=$CONFLUENT_CLOUD_API_SECRET
 
-cd flink
+cd tf
 
-terraform destroy -auto-approve
+source get_vars.sh
 
-cd ../tf
+cd ../data-faker
 
-terraform destroy -auto-approve
-
-cd ..
+mvn package
+java -jar target/data-faker-0.0.1.jar

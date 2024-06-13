@@ -379,6 +379,18 @@ resource "confluent_role_binding" "spring-app-sr-write-rb" {
   crn_pattern = "${confluent_schema_registry_cluster.schema-registry.resource_name}/subject=*"
 }
 
+resource "confluent_role_binding" "cluster-manager-sr-read-rb" {
+  principal = "User:${confluent_service_account.cluster-manager.id}"
+  role_name = "DeveloperRead"
+  crn_pattern = "${confluent_schema_registry_cluster.schema-registry.resource_name}/subject=*"
+}
+
+resource "confluent_role_binding" "cluster-manager-sr-write-rb" {
+  principal = "User:${confluent_service_account.cluster-manager.id}"
+  role_name = "DeveloperWrite"
+  crn_pattern = "${confluent_schema_registry_cluster.schema-registry.resource_name}/subject=*"
+}
+
 # Flink
 
 resource "confluent_flink_compute_pool" "core_compute_pool" {
@@ -389,4 +401,153 @@ resource "confluent_flink_compute_pool" "core_compute_pool" {
   environment {
     id = confluent_environment.example_environment.id
   }
+}
+
+data "confluent_flink_region" "core_compute_pool_region" {
+  cloud   = var.cloud_provider
+  region  = var.deployment_region
+}
+
+data "confluent_organization" "organization" {}
+
+
+resource "confluent_role_binding" "cluster-manager-flink-rbac" {
+    principal   = "User:${confluent_service_account.cluster-manager.id}"
+    role_name   = "FlinkDeveloper"
+    crn_pattern = confluent_environment.example_environment.resource_name
+
+    depends_on = [ confluent_service_account.cluster-manager ]
+}
+
+resource "confluent_api_key" "cluster-manager-flink-api-key" {
+  display_name = "cluster-manager-flink-api-key"
+  description  = "Flink API Key that is owned by 'cluster-manager' service account"
+  owner {
+    id          = confluent_service_account.cluster-manager.id
+    api_version = confluent_service_account.cluster-manager.api_version
+    kind        = confluent_service_account.cluster-manager.kind
+  }
+
+  managed_resource {
+    id          = data.confluent_flink_region.core_compute_pool_region.id
+    api_version = data.confluent_flink_region.core_compute_pool_region.api_version
+    kind        = data.confluent_flink_region.core_compute_pool_region.kind
+
+    environment {
+      id = confluent_environment.example_environment.id
+    }
+  }
+}
+
+
+resource "confluent_flink_statement" "enriched_orders_table" {
+  statement = file("${path.module}/sql/create-enriched-orders.fql")
+
+  environment {
+    id = confluent_environment.example_environment.id
+  }
+
+  organization {
+    id = data.confluent_organization.organization.id
+  }
+
+  compute_pool {
+    id = confluent_flink_compute_pool.core_compute_pool.id
+  }
+
+  principal {
+    id = confluent_service_account.cluster-manager.id
+  }
+  credentials {
+    key    = confluent_api_key.cluster-manager-flink-api-key.id
+    secret = confluent_api_key.cluster-manager-flink-api-key.secret
+  }
+
+  properties = {
+    "sql.current-catalog"  = confluent_environment.example_environment.display_name
+    "sql.current-database" = confluent_kafka_cluster.example_cluster.display_name
+  }
+
+  rest_endpoint = data.confluent_flink_region.core_compute_pool_region.rest_endpoint
+
+  depends_on = [ 
+    confluent_role_binding.cluster-manager-flink-rbac,
+    confluent_role_binding.cluster-manager-sr-read-rb, 
+    confluent_role_binding.cluster-manager-sr-write-rb
+  ]
+}
+
+resource "confluent_flink_statement" "enriched_customers_table" {
+  statement = file("${path.module}/sql/create-enriched-customers.fql")
+
+  environment {
+    id = confluent_environment.example_environment.id
+  }
+
+  organization {
+    id = data.confluent_organization.organization.id
+  }
+
+  principal {
+    id = confluent_service_account.cluster-manager.id
+  }
+
+  compute_pool {
+    id = confluent_flink_compute_pool.core_compute_pool.id
+  }
+  credentials {
+    key    = confluent_api_key.cluster-manager-flink-api-key.id
+    secret = confluent_api_key.cluster-manager-flink-api-key.secret
+  }
+
+  properties = {
+    "sql.current-catalog"  = confluent_environment.example_environment.display_name
+    "sql.current-database" = confluent_kafka_cluster.example_cluster.display_name
+  }
+
+  rest_endpoint = data.confluent_flink_region.core_compute_pool_region.rest_endpoint
+
+  depends_on = [ 
+    confluent_role_binding.cluster-manager-flink-rbac, 
+    confluent_role_binding.cluster-manager-sr-read-rb, 
+    confluent_role_binding.cluster-manager-sr-write-rb 
+  ]
+}
+
+resource "confluent_flink_statement" "order_events_table" {
+  statement = file("${path.module}/sql/create-order-events.fql")
+
+  environment {
+    id = confluent_environment.example_environment.id
+  }
+
+  organization {
+    id = data.confluent_organization.organization.id
+  }
+
+  principal {
+    id = confluent_service_account.cluster-manager.id
+  }
+
+  compute_pool {
+    id = confluent_flink_compute_pool.core_compute_pool.id
+  }
+
+  credentials {
+    key    = confluent_api_key.cluster-manager-flink-api-key.id
+    secret = confluent_api_key.cluster-manager-flink-api-key.secret
+  }
+
+  properties = {
+    "sql.current-catalog"  = confluent_environment.example_environment.display_name
+    "sql.current-database" = confluent_kafka_cluster.example_cluster.display_name
+  }
+
+  rest_endpoint = data.confluent_flink_region.core_compute_pool_region.rest_endpoint
+
+  depends_on = [ 
+    confluent_role_binding.cluster-manager-flink-rbac, 
+    confluent_role_binding.cluster-manager-sr-read-rb, 
+    confluent_role_binding.cluster-manager-sr-write-rb 
+  ]
 }

@@ -3,12 +3,13 @@
 export TF_VAR_confluent_cloud_api_key=$CONFLUENT_CLOUD_API_KEY
 export TF_VAR_confluent_cloud_api_secret=$CONFLUENT_CLOUD_API_SECRET
 
-cd flink
+cd tf
 
-terraform destroy -auto-approve
+source get_vars.sh
 
-cd ../tf
+cd ../flink
 
-terraform destroy -auto-approve
+terraform init
+terraform apply -auto-approve
 
 cd ..

@@ -65,8 +65,16 @@ WITH order_events AS (
             )
         ) as customer
     FROM enriched_orders o
-    INNER JOIN enriched_customer_data FOR SYSTEM_TIME AS OF o.rowtime as e
+    LEFT JOIN enriched_customer_data FOR SYSTEM_TIME AS OF o.rowtime as e
     ON o.customer_id = e.customer_id
+    WHERE (
+      o.statement_action='INSERT'
+    ) OR (
+      o.order_status = 'CANCELLED'
+    )OR (
+      o.statement_action='UPDATE'
+      AND o.shipment_id IS NOT NULL
+    )
 )
 
 SELECT * FROM order_events
