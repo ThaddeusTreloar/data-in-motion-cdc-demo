@@ -15,6 +15,7 @@ provider "confluent" {
 }
 
 resource "confluent_flink_statement" "enriched_customer_data" {
+  
   statement = file("${path.module}/sql/insert-enriched-customer-data.fql")
 
   environment {

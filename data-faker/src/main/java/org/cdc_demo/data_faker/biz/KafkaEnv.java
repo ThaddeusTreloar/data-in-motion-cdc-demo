@@ -19,6 +19,7 @@ public class KafkaEnv {
     private String schemaRegistryUrl;
     private String schemaRegistryUser;
     private String schemaRegistryPass;
+    private boolean firstRun;
 
     public static String SPRING_KAFKA_API_KEY_ENV = "SPRING_KAFKA_API_KEY";
     public static String SPRING_KAFKA_API_SECRET_ENV = "SPRING_KAFKA_API_SECRET";
@@ -26,6 +27,7 @@ public class KafkaEnv {
     public static String SPRING_KAFKA_SCHEMA_REGISTRY_URL_ENV = "SPRING_KAFKA_SCHEMA_REGISTRY_URL";
     public static String SPRING_KAFKA_SCHEMA_USER_ENV = "SPRING_KAFKA_SCHEMA_USER";
     public static String SPRING_KAFKA_SCHEMA_PASS_ENV = "SPRING_KAFKA_SCHEMA_PASS";
+    public static String SPRING_KAFKA_FIRST_RUN = "SPRING_KAFKA_FIRST_RUN";
 
     public KafkaEnv() {
         this.apiKey =System.getenv(SPRING_KAFKA_API_KEY_ENV);
@@ -34,6 +36,8 @@ public class KafkaEnv {
         this.schemaRegistryUrl =System.getenv(SPRING_KAFKA_SCHEMA_REGISTRY_URL_ENV);
         this.schemaRegistryUser =System.getenv(SPRING_KAFKA_SCHEMA_USER_ENV);
         this.schemaRegistryPass =System.getenv(SPRING_KAFKA_SCHEMA_PASS_ENV);
+
+        this.firstRun = Boolean.parseBoolean(System.getenv(SPRING_KAFKA_FIRST_RUN));
     }
 
     public boolean isNull() {
@@ -43,6 +47,10 @@ public class KafkaEnv {
             | this.getSchemaRegistryUrl() == null
             | this.getSchemaRegistryUser() == null
             | this.getSchemaRegistryPass() == null;
+    }
+
+    public boolean isFirstRun() {
+        return this.firstRun;
     }
 
     public Properties intoConfigMap() {

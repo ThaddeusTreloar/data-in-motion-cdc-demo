@@ -14,8 +14,9 @@ CREATE TABLE enriched_orders (
   shipment_updated_on TIMESTAMP_LTZ(3),
   shipment_status STRING,
   rowtime TIMESTAMP(3),
-  WATERMARK FOR rowtime AS rowtime,
+  WATERMARK FOR rowtime AS rowtime - INTERVAL '0.001' SECOND,
   PRIMARY KEY (order_id) NOT ENFORCED
 ) WITH (
+  'kafka.partitions' = '1',
   'changelog.mode' = 'upsert'
 )

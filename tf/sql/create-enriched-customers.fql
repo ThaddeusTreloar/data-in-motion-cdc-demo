@@ -23,8 +23,9 @@ CREATE TABLE enriched_customer_data (
   billing_country STRING,
   billing_postcode STRING,
   rowtime TIMESTAMP(3),
-  WATERMARK FOR rowtime AS rowtime,
+  WATERMARK FOR rowtime AS rowtime - INTERVAL '0.001' SECOND,
   PRIMARY KEY (customer_id) NOT ENFORCED
 ) WITH (
+  'kafka.partitions' = '1',
   'changelog.mode' = 'upsert'
 )

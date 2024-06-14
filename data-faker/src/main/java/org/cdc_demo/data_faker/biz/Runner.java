@@ -53,6 +53,8 @@ public class Runner {
 
     private Topics topics;
 
+    private KafkaEnv env;
+
     private static <K extends SpecificRecord, V extends SpecificRecord> KafkaProducer<K, V> initProducer(
             Topic<K, V> topic, Properties props) {
         return new KafkaProducer<K, V>(
@@ -247,6 +249,8 @@ public class Runner {
         this.topics = new Topics(config);
         var props = config.intoConfigMap();
 
+        this.env = config;
+
         this.customer_producer = initProducer(this.topics.getCustomers(), props);
         this.contact_producer = initProducer(this.topics.getContacts(), props);
         this.address_producer = initProducer(this.topics.getAddresses(), props);
@@ -257,51 +261,56 @@ public class Runner {
     }
 
     public void run() {
-        // Initialise customers, contacts, addresses, and products
-        try {
-            for (long i = 0; i < 2000; i++) {
-                var table_id = TableId.newBuilder().setId(i).build();
-                var customer = generator.generateCustomer();
-                var contact = generator.generateContact(table_id.getId(), customer);
-                var shipping_address = generator.generateShippingAddress(table_id.getId());
-                var billing_address = generator.generateBillingAddress(table_id.getId(), shipping_address);
-
-                customer_producer.send(new ProducerRecord<>(topics.getCustomers().getName(), table_id, customer));
-                customers.put(table_id.getId(), customer);
-                
-                contact_producer.send(new ProducerRecord<>(topics.getContacts().getName(), table_id, contact));
-                contacts.put(table_id.getId(), contact);
-
-                var address_id = TableId.newBuilder().setId((long) addresses.size()).build();
-                address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), address_id, shipping_address));
-                addresses.add(shipping_address);
-
-                address_id = TableId.newBuilder().setId((long) addresses.size()).build();
-                address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), address_id, billing_address));
-                addresses.add(billing_address);
-
-                log.info("Table ID: {}", table_id);
-                log.info("Customer: {}", customer);
-                log.info("Contact: {}", contact);
-                log.info("Address: {}", shipping_address);
+        if (this.env.isFirstRun()) {
+            log.info("First run, initialising customer and product data");
+            // Initialise customers, contacts, addresses, and products
+            try {
+                for (long i = 0; i < 2000; i++) {
+                    var table_id = TableId.newBuilder().setId(i).build();
+                    var customer = generator.generateCustomer();
+                    var contact = generator.generateContact(table_id.getId(), customer);
+                    var shipping_address = generator.generateShippingAddress(table_id.getId());
+                    var billing_address = generator.generateBillingAddress(table_id.getId(), shipping_address);
+    
+                    customer_producer.send(new ProducerRecord<>(topics.getCustomers().getName(), table_id, customer));
+                    customers.put(table_id.getId(), customer);
+                    
+                    contact_producer.send(new ProducerRecord<>(topics.getContacts().getName(), table_id, contact));
+                    contacts.put(table_id.getId(), contact);
+    
+                    var address_id = TableId.newBuilder().setId((long) addresses.size()).build();
+                    address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), address_id, shipping_address));
+                    addresses.add(shipping_address);
+    
+                    address_id = TableId.newBuilder().setId((long) addresses.size()).build();
+                    address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), address_id, billing_address));
+                    addresses.add(billing_address);
+    
+                    log.info("Table ID: {}", table_id);
+                    log.info("Customer: {}", customer);
+                    log.info("Contact: {}", contact);
+                    log.info("Address: {}", shipping_address);
+                }
+    
+                for (long i = 0; i < Generator.PRODUCT_POOL_SIZE; i++) {
+                    var table_id = TableId.newBuilder().setId(i).build();
+                    var product = generator.generateProduct();
+    
+                    product_producer.send(new ProducerRecord<>(topics.getProducts().getName(), table_id, product));
+    
+                    log.info("Table ID: {}", table_id);
+                    log.info("Product: {}", product);
+    
+                    products.put(table_id.getId(), product);
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+                System.exit(0);
+            } finally {
+                product_producer.close();
             }
-
-            for (long i = 0; i < Generator.PRODUCT_POOL_SIZE; i++) {
-                var table_id = TableId.newBuilder().setId(i).build();
-                var product = generator.generateProduct();
-
-                product_producer.send(new ProducerRecord<>(topics.getProducts().getName(), table_id, product));
-
-                log.info("Table ID: {}", table_id);
-                log.info("Product: {}", product);
-
-                products.put(table_id.getId(), product);
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-            System.exit(0);
-        } finally {
-            product_producer.close();
+        } else {
+            log.info("Not first run, skipping initialisation");
         }
 
         var next_customer_id = 2000L;
@@ -372,7 +381,7 @@ public class Runner {
                 address_producer.send(new ProducerRecord<>(topics.getAddresses().getName(), address_id, billing_address));
                 addresses.add(billing_address);
 
-                Thread.sleep(1000);
+                Thread.sleep(200);
             }
         } catch (Exception e) {
             System.out.println(e);

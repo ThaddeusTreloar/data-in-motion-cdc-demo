@@ -110,6 +110,10 @@ flink_up.sh
 
 This will start the flink jobs, which will process the `cdc` topic and generate business events.
 
+### Restarting the faker task
+
+If for any reason you have to stop the faker task, you can do so by pressing ctrl+c in the terminal running the app. From this point onwards DO NOT RUN `faker_up.sh` again. This will break the flink queries as the faker app will repopulate order-line-items data, breaking the logic for joining orders to their line items. 
+
 ## Stopping the demo
 
 To stop the demo, stop the faker app by pressing ctrl+c in the terminal running the app. Then, you can run the following command:
