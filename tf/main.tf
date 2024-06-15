@@ -229,7 +229,7 @@ resource "confluent_kafka_topic" "contacts-topic" {
     secret = confluent_api_key.cluster-manager-api-key.secret
   }
 
-  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-flink-rbac ]
+  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-rbac ]
 }
 
 resource "confluent_kafka_topic" "customers-topic" {
@@ -245,7 +245,7 @@ resource "confluent_kafka_topic" "customers-topic" {
     secret = confluent_api_key.cluster-manager-api-key.secret
   }
 
-  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-flink-rbac ]
+  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-rbac ]
 }
 
 resource "confluent_kafka_topic" "addresses-topic" {
@@ -261,7 +261,7 @@ resource "confluent_kafka_topic" "addresses-topic" {
     secret = confluent_api_key.cluster-manager-api-key.secret
   }
 
-  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-flink-rbac ]
+  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-rbac ]
 }
 
 resource "confluent_kafka_topic" "shipments-topic" {
@@ -277,7 +277,7 @@ resource "confluent_kafka_topic" "shipments-topic" {
     secret = confluent_api_key.cluster-manager-api-key.secret
   }
 
-  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-flink-rbac ]
+  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-rbac ]
 }
 
 resource "confluent_kafka_topic" "orders-topic" {
@@ -293,7 +293,7 @@ resource "confluent_kafka_topic" "orders-topic" {
     secret = confluent_api_key.cluster-manager-api-key.secret
   }
 
-  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-flink-rbac ]
+  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-rbac ]
 }
 
 resource "confluent_kafka_topic" "order-line-items-topic" {
@@ -309,7 +309,7 @@ resource "confluent_kafka_topic" "order-line-items-topic" {
     secret = confluent_api_key.cluster-manager-api-key.secret
   }
 
-  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-flink-rbac ]
+  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-rbac ]
 }
 
 resource "confluent_kafka_topic" "products-topic" {
@@ -325,7 +325,7 @@ resource "confluent_kafka_topic" "products-topic" {
     secret = confluent_api_key.cluster-manager-api-key.secret
   }
 
-  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-flink-rbac ]
+  depends_on = [ confluent_service_account.cluster-manager, confluent_api_key.cluster-manager-api-key, confluent_role_binding.cluster-manager-rbac ]
 }
 
 # Schema Registry
